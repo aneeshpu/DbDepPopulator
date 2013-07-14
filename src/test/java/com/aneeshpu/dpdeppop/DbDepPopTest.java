@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.*;
@@ -7,6 +8,7 @@ import java.sql.*;
 public class DbDepPopTest {
 
     @Test
+    @Ignore
     public void gets_metadata() throws SQLException {
 
         final Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost/datadeppop", "datapopulator", "letmein");
@@ -42,4 +44,6 @@ public class DbDepPopTest {
             }
         }
     }
+    
+
 }

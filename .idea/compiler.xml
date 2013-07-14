@@ -27,6 +27,9 @@
         <module name="DBDependencyPopulator" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="DBDependencyPopulator" target="1.6" />
+    </bytecodeTargetLevel>
   </component>
 </project>
 

@@ -12,12 +12,7 @@ public class Column {
     private double columnSize;
     private YesNo yesNo;
 
-    public Column(final String name, final Table table) {
-        this.name = name;
-        this.table = table;
-    }
-
-    public Column() {
+    private Column() {
     }
 
     @Override
@@ -64,7 +59,6 @@ public class Column {
     }
 
     private void setSize(final double columnSize) {
-
         this.columnSize = columnSize;
     }
 
@@ -75,6 +69,14 @@ public class Column {
     private void setAutoIncrement(final YesNo yesNo) {
 
         this.yesNo = yesNo;
+    }
+
+    private void setTable(final Table table) {
+        this.table = table;
+    }
+
+    public Table getTable() {
+        return table;
     }
 
     static class ColumnBuilder {
@@ -111,6 +113,11 @@ public class Column {
 
         public ColumnBuilder withIsAutoIncrement(final String autoIncrement) {
             column.setAutoIncrement(new YesNo(autoIncrement));
+            return this;
+        }
+
+        public ColumnBuilder withTable(final Table table) {
+            column.setTable(table);
             return this;
         }
     }

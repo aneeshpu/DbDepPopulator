@@ -23,15 +23,14 @@ public class ColumnTest {
     @Test
     public void considers_two_columns_from_the_same_table_with_same_names_are_equal(){
 
-        final Column idColumn = new Column("id", new Table("payment", connection));
-        final Column anotherIdColumn = new Column("id", new Table("payment", connection));
+        final Column idColumn = Column.buildColumn().withName("id").withTable(new Table("payment", connection)).create();
+        final Column anotherIdColumn = Column.buildColumn().withName("id").withTable(new Table("payment", connection)).create();
 
         assertThat(idColumn, is(equalTo(anotherIdColumn)));
     }
 
     @Test
     public void prints_to_string_with_column_name(){
-
-        assertThat(new Column("id", null).toString(), is(equalTo("id")));
+        assertThat(Column.buildColumn().withName("id").create().toString(), is(equalTo("id")));
     }
 }

@@ -11,14 +11,12 @@
     <inspection_tool class="FeatureEnvy" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreTestCases" value="false" />
     </inspection_tool>
-    <inspection_tool class="InstanceVariableOfConcreteClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InstanceofChain" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreInstanceofOnLibraryClasses" value="false" />
     </inspection_tool>
     <inspection_tool class="InstanceofInterfaces" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InstanceofThis" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MagicNumber" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="MethodReturnOfConcreteClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="OverlyStrongTypeCast" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreInMatchingInstanceof" value="false" />
     </inspection_tool>

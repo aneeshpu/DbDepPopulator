@@ -44,7 +44,7 @@ public class TableTest {
     @Test
     public void populates_columns(){
 
-        paymentTable.columns().contains(new Column("id", null));
+        assertThat(paymentTable.columns(),contains(new Column("id", null)));
 
     }
 

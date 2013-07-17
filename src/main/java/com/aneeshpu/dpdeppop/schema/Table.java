@@ -96,6 +96,6 @@ public class Table {
     }
 
     public List<Column> columns() {
-        return Collections.<Column>emptyList();
+        return columns;
     }
 }

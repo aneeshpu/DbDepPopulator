@@ -141,6 +141,26 @@ public class Table {
 
     public List<String> generateSQL() {
 
+        final List<String> queries = new ArrayList<>();
+
+        generateParentSqls(queries);
+
+        final String query = generateInsertForCurrentTable();
+        queries.add(query);
+
+        return queries;
+    }
+
+    private void generateParentSqls(final List<String> queries) {
+        for (Map.Entry<String, Table> entry : parentTables.entrySet()) {
+
+            final Table parentTable = entry.getValue();
+            final List<String> parentSqls = parentTable.generateSQL();
+            queries.addAll(parentSqls);
+        }
+    }
+
+    private String generateInsertForCurrentTable() {
         final Set<Map.Entry<String, Column>> entrySet = columns.entrySet();
 
         final StringBuilder fullQuery = new StringBuilder(String.format("insert into %s ",name));
@@ -177,10 +197,7 @@ public class Table {
         if (LOG.isDebugEnabled()) {
             LOG.debug("namesQuery:" + query);
         }
-
-        final List<String> queries = new ArrayList<>();
-        final boolean add = queries.add(query);
-        return queries;
+        return query;
     }
 
     private class ColumnTable {

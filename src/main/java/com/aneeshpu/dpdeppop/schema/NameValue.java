@@ -18,7 +18,8 @@ class NameValue {
         final NameValue nameValue = (NameValue) o;
 
         if (columnName != null ? !columnName.equals(nameValue.columnName) : nameValue.columnName != null) return false;
-        if (columnValue != null ? !columnValue.equals(nameValue.columnValue) : nameValue.columnValue != null) return false;
+        if (columnValue != null ? !columnValue.equals(nameValue.columnValue) : nameValue.columnValue != null)
+            return false;
 
         return true;
     }
@@ -32,7 +33,7 @@ class NameValue {
 
     @Override
     public String toString() {
-        return String.format("%s=%s",columnName, columnValue);
+        return String.format("%s=%s", columnName, columnValue);
     }
 
     public Object value() {
@@ -40,7 +41,7 @@ class NameValue {
     }
 
     public String name() {
-        return columnName;
+        return String.format("'%s'", columnName);
     }
 
     public static NameValue createAutoIncrement() {

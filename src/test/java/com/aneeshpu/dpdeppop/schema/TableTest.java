@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -74,10 +75,35 @@ public class TableTest {
         final List<String> sql = accountTable.generateSQL();
         System.out.println(sql.get(0));
 
-        final Pattern insertIntoAccountQueryPattern = Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)");
+        final Pattern insertIntoAccountQueryPattern = Pattern.compile("insert into account \\('name'\\) values \\('\\w'\\)");
 
         assertThat(insertIntoAccountQueryPattern.matcher(sql.get(0)).matches(), is(true));
+    }
 
+    @Test
+    public void generates_insert_sql_for_parent_tables_and_itself() throws SQLException {
+
+        paymentTable.initialize();
+
+        final List<String> generatedSqls = paymentTable.generateSQL();
+
+        for (String generatedSql : generatedSqls) {
+            System.out.println(generatedSql);
+        }
+
+        final List<Pattern> patterns = new ArrayList<>();
+        patterns.add(Pattern.compile("insert into account \\('name'\\) values \\('\\w'\\)"));
+        patterns.add(Pattern.compile("insert into invoice \\('amount','account_id'\\) values \\(\\d,\\d\\)"));
+        patterns.add(Pattern.compile("insert into payment \\('invoice_id','amount','status'\\) values \\(\\d,\\d\\,'\\w'\\)"));
+
+        assertThat(generatedSqls.size(), is(equalTo(3)));
+
+        for (int i = 0; i < patterns.size(); i++) {
+            final String generatedSql = generatedSqls.get(0);
+            final Pattern pattern = patterns.get(i);
+
+            assertThat(pattern.matcher(generatedSql).matches(), is(true));
+        }
     }
 
     private Matcher<? super List<? extends Object>> contains(final Object expectedObject) {

@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
@@ -44,12 +45,12 @@ public class TableTest {
     }
 
     @Test
-    public void populates_columns(){
+    public void populates_columns() {
         assertNotNull(paymentTable.columns().get("id"));
     }
 
     @Test
-    public void foreign_keys_are_populated_with_their_referencing_tables(){
+    public void foreign_keys_are_populated_with_their_referencing_tables() {
         final Column invoiceId = paymentTable.columns().get("invoice_id");
         assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withName("id").create())));
     }
@@ -59,16 +60,31 @@ public class TableTest {
     }
 
     @Test
-    public void creates_a_string_representation_of_table(){
+    public void creates_a_string_representation_of_table() {
 
         assertThat(new Table("payment", null).toString(), is(equalTo("payment")));
+    }
+
+    @Test
+    public void generates_an_insert_query() throws SQLException {
+
+        final Table accountTable = new Table("account", connection);
+        accountTable.initialize();
+
+        final List<String> sql = accountTable.generateSQL();
+        System.out.println(sql.get(0));
+
+        final Pattern insertIntoAccountQueryPattern = Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)");
+
+        assertThat(insertIntoAccountQueryPattern.matcher(sql.get(0)).matches(), is(true));
+
     }
 
     private Matcher<? super List<? extends Object>> contains(final Object expectedObject) {
         return new BaseMatcher<List<? extends Object>>() {
             @Override
             public boolean matches(final Object o) {
-                if(!(o instanceof List)){
+                if (!(o instanceof List)) {
 
                     return false;
                 }

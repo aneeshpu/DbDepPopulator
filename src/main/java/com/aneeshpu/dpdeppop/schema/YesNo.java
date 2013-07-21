@@ -7,7 +7,14 @@ package com.aneeshpu.dpdeppop.schema;
  * Time: 2:45 AM
  * To change this template use File | Settings | File Templates.
  */
-public class YesNo {
+class YesNo {
+    private final String yesNo;
+
     public YesNo(final String yesNo) {
+        this.yesNo = yesNo;
+    }
+
+    public boolean isTrue() {
+        return "YES".equalsIgnoreCase(yesNo);
     }
 }

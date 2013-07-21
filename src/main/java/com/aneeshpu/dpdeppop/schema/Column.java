@@ -1,8 +1,10 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import com.aneeshpu.dpdeppop.schema.datatypes.DataType;
+
 public class Column {
     public static final String COLUMN_NAME = "COLUMN_NAME";
-    public static final String DATA_TYPE = "DATA_TYPE";
+    public static final String TYPE_NAME = "TYPE_NAME";
     public static final String COLUMN_SIZE = "COLUMN_SIZE";
     public static final String IS_NULLABLE = "IS_NULLABLE";
     public static final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
@@ -10,9 +12,11 @@ public class Column {
     private Table table;
     private DataType dataType;
     private double columnSize;
-    private YesNo yesNo;
     private Table referencingTable;
     private Column referencingColumn;
+
+    private YesNo autoIncrement = new YesNo("NO");
+    private YesNo isNullable = new YesNo("NO");
 
     private Column() {
     }
@@ -55,8 +59,8 @@ public class Column {
         this.name = columnName;
     }
 
-    private void setDataType(final String dataType) {
-        this.dataType = new DataType(dataType);
+    private void setDataType(final DataType dataType1) {
+        this.dataType = dataType1;
 
     }
 
@@ -65,12 +69,11 @@ public class Column {
     }
 
     private void setNullable(final YesNo yesNo) {
-        this.yesNo = yesNo;
+        this.isNullable = yesNo;
     }
 
     private void setAutoIncrement(final YesNo yesNo) {
-
-        this.yesNo = yesNo;
+        this.autoIncrement = yesNo;
     }
 
     private void setTable(final Table table) {
@@ -97,6 +100,22 @@ public class Column {
         return referencingColumn;
     }
 
+    public NameValue nameValue() {
+        if(autoIncrement.isTrue()){
+            return NameValue.createAutoIncrement();
+        }
+
+        return isForeignKey() ? new NameValue(name, referencingColumn.nameValue().value()) : new NameValue(name, dataType.generateDefaultValue());
+    }
+
+    private boolean isForeignKey() {
+        return referencingColumn != null;
+    }
+
+    public boolean isAutoIncrement() {
+        return autoIncrement.isTrue();
+    }
+
     static class ColumnBuilder {
 
         private final Column column;
@@ -114,7 +133,7 @@ public class Column {
             return column;
         }
 
-        public ColumnBuilder withDataType(final String dataType) {
+        public ColumnBuilder withDataType(final DataType dataType) {
             column.setDataType(dataType);
             return this;
         }

@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import com.aneeshpu.dpdeppop.schema.datatypes.DataTypeFactory;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -49,7 +50,7 @@ public class Table {
 
         while (columnsResultset.next()) {
             final String columnName = columnsResultset.getString(Column.COLUMN_NAME);
-            final String dataType = columnsResultset.getString(Column.DATA_TYPE);
+            final String dataType = columnsResultset.getString(Column.TYPE_NAME);
             final String columnSize = columnsResultset.getString(Column.COLUMN_SIZE);
             final String isNullable = columnsResultset.getString(Column.IS_NULLABLE);
             final String isAutoIncrement = columnsResultset.getString(Column.IS_AUTOINCREMENT);
@@ -64,7 +65,7 @@ public class Table {
             }
 
             columns.put(columnName, Column.buildColumn().withName(columnName)
-                    .withDataType(dataType)
+                    .withDataType(DataTypeFactory.create(dataType))
                     .withSize(Double.valueOf(columnSize))
                     .withIsNullable(isNullable)
                     .withIsAutoIncrement(isAutoIncrement)
@@ -136,6 +137,50 @@ public class Table {
 
 
         return foreignKeys;
+    }
+
+    public List<String> generateSQL() {
+
+        final Set<Map.Entry<String, Column>> entrySet = columns.entrySet();
+
+        final StringBuilder fullQuery = new StringBuilder(String.format("insert into %s ",name));
+        StringBuilder columnNamesPartOfQuery = new StringBuilder("(");
+        final StringBuilder valuesPartOfQuery = new StringBuilder("(");
+
+        for (Map.Entry<String, Column> stringColumnEntry : entrySet) {
+
+            final Column column = stringColumnEntry.getValue();
+            if(column.isAutoIncrement()){
+                continue;
+            }
+
+            final NameValue nameValue = column.nameValue();
+
+            columnNamesPartOfQuery.append(nameValue.name());
+            columnNamesPartOfQuery.append(",");
+
+            valuesPartOfQuery.append(nameValue.value());
+            valuesPartOfQuery.append(",");
+        }
+
+        columnNamesPartOfQuery.deleteCharAt(columnNamesPartOfQuery.length() - 1);
+        valuesPartOfQuery.deleteCharAt(valuesPartOfQuery.length() - 1);
+
+        columnNamesPartOfQuery.append(")");
+        valuesPartOfQuery.append(")");
+
+        fullQuery.append(columnNamesPartOfQuery.toString());
+        fullQuery.append(" values ");
+        fullQuery.append(valuesPartOfQuery.toString());
+
+        final String query = fullQuery.toString();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("namesQuery:" + query);
+        }
+
+        final List<String> queries = new ArrayList<>();
+        final boolean add = queries.add(query);
+        return queries;
     }
 
     private class ColumnTable {

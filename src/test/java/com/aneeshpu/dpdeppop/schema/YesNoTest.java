@@ -9,15 +9,19 @@ import static org.junit.Assert.assertThat;
 /**
  * Created with IntelliJ IDEA.
  * User: aneeshpu
- * Date: 16/7/13
- * Time: 2:07 AM
+ * Date: 21/7/13
+ * Time: 12:16 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DataTypeTest {
+public class YesNoTest {
 
     @Test
-    public void considers_equal_if_names_are_same(){
+    public void returns_true_for_yes(){
+        assertThat(new YesNo("YES").isTrue(), is(equalTo(true)));
+    }
 
-        assertThat(new DataType("serial"), is(equalTo(new DataType("serial"))));
+    @Test
+    public void returns_false_for_no(){
+        assertThat(new YesNo("NO").isTrue(), is(equalTo(false)));
     }
 }

@@ -25,7 +25,7 @@ public class DbDepPopTest {
 
         while (paymentTableResultSet.next()) {
             for (int i = 1; i <= paymentTableResultSetMetaData.getColumnCount(); i++) {
-                System.out.print(paymentTableResultSet.getString(i) + "\t");
+//                System.out.print(paymentTableResultSet.getString(i) + "\t");
 //            System.out.println(paymentTableResultSetMetaData.getColumnType(i) + "," + paymentTableResultSetMetaData.getColumnTypeName(i) + "," + paymentTableResultSetMetaData.isNullable(i));
             }
 

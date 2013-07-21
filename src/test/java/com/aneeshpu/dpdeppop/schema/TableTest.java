@@ -9,7 +9,9 @@ import org.junit.Test;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
+import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -28,35 +30,32 @@ public class TableTest {
     @Test
     public void gets_initialized_with_parents() throws SQLException {
 
-        final List<Table> parents = paymentTable.parents();
+        final Map<String, Table> parents = paymentTable.parents();
 
-        assertThat(parents, contains(new Table("invoice", connection)));
-        assertThat(parents, contains(new Table("payment_status", connection)));
+        assertNotNull(parents.get("invoice"));
+        assertNotNull(parents.get("payment_status"));
     }
 
     @Test
     public void parents_are_initialized_with_their_parents() throws SQLException {
 
         final Table invoiceTable = get(paymentTable.parents(), new Table("invoice", connection));
-        assertThat(invoiceTable.parents(), contains(new Table("account", connection)));
+        assertNotNull(invoiceTable.parents().get("account"));
     }
 
     @Test
     public void populates_columns(){
-
-        assertThat(paymentTable.columns(),contains(Column.buildColumn().withName("id").create()));
-
+        assertNotNull(paymentTable.columns().get("id"));
     }
 
-    private Table get(final List<Table> parents, final Table table) {
-        for (Table parent : parents) {
+    @Test
+    public void foreign_keys_are_populated_with_their_referencing_tables(){
+        final Column invoiceId = paymentTable.columns().get("invoice_id");
+        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withName("id").create())));
+    }
 
-            if(table.equals(parent)){
-                return parent;
-            }
-
-        }
-        return null;
+    private Table get(final Map<String, Table> parents, final Table table) {
+        return parents.get(table.toString());
     }
 
     @Test

@@ -11,6 +11,8 @@ public class Column {
     private DataType dataType;
     private double columnSize;
     private YesNo yesNo;
+    private Table referencingTable;
+    private Column referencingColumn;
 
     private Column() {
     }
@@ -79,6 +81,22 @@ public class Column {
         return table;
     }
 
+    public void setReferencingTable(final Table referencingTable) {
+        this.referencingTable = referencingTable;
+    }
+
+    public Table getReferencingTable() {
+        return referencingTable;
+    }
+
+    public void setReferencingColumn(final Column referencingColumn) {
+        this.referencingColumn = referencingColumn;
+    }
+
+    public Column getReferencingColumn() {
+        return referencingColumn;
+    }
+
     static class ColumnBuilder {
 
         private final Column column;
@@ -118,6 +136,16 @@ public class Column {
 
         public ColumnBuilder withTable(final Table table) {
             column.setTable(table);
+            return this;
+        }
+
+        public ColumnBuilder withReferencingTable(final Table referencingTable) {
+            column.setReferencingTable(referencingTable);
+            return this;
+        }
+
+        public ColumnBuilder withReferencingColumn(final Column referencingColumn) {
+            column.setReferencingColumn(referencingColumn);
             return this;
         }
     }

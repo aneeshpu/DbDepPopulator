@@ -19,11 +19,7 @@ public class DbDepPopTest {
 
         System.out.println(paymentTableResultSetMetaData.getColumnCount());
 
-        for (int i = 1; i <= paymentTableResultSetMetaData.getColumnCount(); i++) {
-//            System.out.print(paymentTableResultSet.getString(i) + "\t");
-//            System.out.println(paymentTableResultSetMetaData.getColumnType(i) + "," + paymentTableResultSetMetaData.getColumnTypeName(i) + "," + paymentTableResultSetMetaData.isNullable(i));
-            System.out.print(paymentTableResultSetMetaData.getColumnName(i) + "\t");
-        }
+        printCols(paymentTableResultSetMetaData);
 
         System.out.println("\n");
 
@@ -49,24 +45,46 @@ public class DbDepPopTest {
 
 //        final ResultSet paymentCrossReference = metaData.getImportedKeys(null, null, "payment");
 
-//        final ResultSet paymentCrossReference = metaData.getCrossReference(null, null, null, null, null, "payment");
-//        paymentCrossReference.next();
-//        System.out.print(paymentCrossReference.getString("pktable_name") + "\t");
-//        System.out.print(paymentCrossReference.getString("pkcolumn_name") + "\t");
-//        System.out.print(paymentCrossReference.getString("fktable_name") + "\t");
-//        System.out.print(paymentCrossReference.getString("fkcolumn_name") + "\t");
-//
-//        for (int i = 1; i <= paymentCrossReference.getMetaData().getColumnCount(); i++) {
-//                System.out.print(paymentCrossReference.getString(i) + "\t");
+        final ResultSet paymentCrossReference = metaData.getCrossReference(null, null, null, null, null, "payment");
 
-//            while (paymentCrossReference.next()) {
-//
-//
-//                System.out.println("\n");
-//            }
-//        }
+        printCols(paymentCrossReference.getMetaData());
+
+        while(paymentCrossReference.next()){
+            System.out.print(paymentCrossReference.getString("pktable_name") + "\t");
+            System.out.print(paymentCrossReference.getString("pkcolumn_name") + "\t");
+            System.out.print(paymentCrossReference.getString("fktable_name") + "\t");
+            System.out.print(paymentCrossReference.getString("fkcolumn_name") + "\t");
+
+            System.out.println("\n");
+        }
+
+        /*paymentCrossReference.next();
+        System.out.print(paymentCrossReference.getString("pktable_name") + "\t");
+        System.out.print(paymentCrossReference.getString("pkcolumn_name") + "\t");
+        System.out.print(paymentCrossReference.getString("fktable_name") + "\t");
+        System.out.print(paymentCrossReference.getString("fkcolumn_name") + "\t");
+
+        for (int i = 1; i <= paymentCrossReference.getMetaData().getColumnCount(); i++) {
+                System.out.print(paymentCrossReference.getString(i) + "\t");
+
+            while (paymentCrossReference.next()) {
 
 
+                System.out.println("\n");
+            }
+        }*/
+
+
+    }
+
+    private void printCols(final ResultSetMetaData paymentTableResultSetMetaData) throws SQLException {
+        for (int i = 1; i <= paymentTableResultSetMetaData.getColumnCount(); i++) {
+//            System.out.print(paymentTableResultSet.getString(i) + "\t");
+//            System.out.println(paymentTableResultSetMetaData.getColumnType(i) + "," + paymentTableResultSetMetaData.getColumnTypeName(i) + "," + paymentTableResultSetMetaData.isNullable(i));
+            System.out.print(paymentTableResultSetMetaData.getColumnName(i) + "\t");
+        }
+
+        System.out.println("\n");
     }
 
 

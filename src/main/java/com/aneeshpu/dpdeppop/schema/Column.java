@@ -2,6 +2,9 @@ package com.aneeshpu.dpdeppop.schema;
 
 import com.aneeshpu.dpdeppop.schema.datatypes.DataType;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Column {
     public static final String COLUMN_NAME = "COLUMN_NAME";
     public static final String TYPE_NAME = "TYPE_NAME";
@@ -17,6 +20,7 @@ public class Column {
 
     private YesNo autoIncrement = new YesNo("NO");
     private YesNo isNullable = new YesNo("NO");
+    private NameValue nameValue;
 
     private Column() {
     }
@@ -101,11 +105,16 @@ public class Column {
     }
 
     public NameValue nameValue() {
-        if(autoIncrement.isTrue()){
-            return NameValue.createAutoIncrement();
+        if (nameValue != null) {
+            return nameValue;
         }
 
-        return isForeignKey() ? new NameValue(name, referencingColumn.nameValue().value()) : new NameValue(name, dataType.generateDefaultValue());
+        if (autoIncrement.isTrue()) {
+            nameValue = NameValue.createAutoIncrement();
+        }
+
+        nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue().value()) : new NameValue(name, dataType.generateDefaultValue());
+        return nameValue;
     }
 
     private boolean isForeignKey() {
@@ -114,6 +123,12 @@ public class Column {
 
     public boolean isAutoIncrement() {
         return autoIncrement.isTrue();
+    }
+
+    public void populateGeneratedValue(final ResultSet generatedKeys) throws SQLException {
+
+        final Object generatedValue = dataType.getGeneratedValue(generatedKeys, name);
+        this.nameValue = new NameValue(name, generatedValue);
     }
 
     static class ColumnBuilder {

@@ -1,14 +1,9 @@
 package com.aneeshpu.dpdeppop.schema.datatypes;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Random;
 
-/**
- * Created with IntelliJ IDEA.
- * User: aneeshpu
- * Date: 21/7/13
- * Time: 12:08 AM
- * To change this template use File | Settings | File Templates.
- */
 class IntDataType implements DataType<Integer> {
     private final String name;
 
@@ -24,5 +19,11 @@ class IntDataType implements DataType<Integer> {
     @Override
     public Integer generateDefaultValue() {
         return Integer.parseInt(toString());
+    }
+
+    @Override
+    public Integer getGeneratedValue(final ResultSet generatedKeys, final String columnName) throws SQLException {
+
+        return generatedKeys.getInt(columnName);
     }
 }

@@ -57,4 +57,17 @@ public class Matchers {
         };
 
     }
+
+    public static Matcher<Object> aNumber() {
+        return new BaseMatcher<Object>() {
+            @Override
+            public boolean matches(final Object o) {
+                return o instanceof Integer;
+            }
+
+            @Override
+            public void describeTo(final Description description) {
+            }
+        };
+    }
 }

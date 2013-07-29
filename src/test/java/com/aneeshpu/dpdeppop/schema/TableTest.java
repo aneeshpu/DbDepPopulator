@@ -72,10 +72,10 @@ public class TableTest {
         final Table accountTable = new Table("account", connection);
         accountTable.initialize();
 
-        final List<String> sql = accountTable.generateSQL();
+        final List<String> sql = accountTable.insertDefaultValues();
         System.out.println(sql.get(0));
 
-        final Pattern insertIntoAccountQueryPattern = Pattern.compile("insert into account \\('name'\\) values \\('\\w'\\)");
+        final Pattern insertIntoAccountQueryPattern = Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)");
 
         assertThat(insertIntoAccountQueryPattern.matcher(sql.get(0)).matches(), is(true));
     }
@@ -85,24 +85,26 @@ public class TableTest {
 
         paymentTable.initialize();
 
-        final List<String> generatedSqls = paymentTable.generateSQL();
+        final List<String> generatedSqls = paymentTable.insertDefaultValues();
 
         for (String generatedSql : generatedSqls) {
             System.out.println(generatedSql);
         }
 
         final List<Pattern> patterns = new ArrayList<>();
-        patterns.add(Pattern.compile("insert into account \\('name'\\) values \\('\\w'\\)"));
-        patterns.add(Pattern.compile("insert into invoice \\('amount','account_id'\\) values \\(\\d,\\d\\)"));
-        patterns.add(Pattern.compile("insert into payment \\('invoice_id','amount','status'\\) values \\(\\d,\\d\\,'\\w'\\)"));
 
-        assertThat(generatedSqls.size(), is(equalTo(3)));
+        patterns.add(Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)"));
+        patterns.add(Pattern.compile("insert into invoice \\(amount,account_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+\\)"));
+        patterns.add(Pattern.compile("insert into payment_status \\(id,description,name\\) values \\([-+]?[0-9]*\\.?[0-9]+,'\\w','\\w'\\)"));
+        patterns.add(Pattern.compile("insert into payment \\(amount,status,invoice_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+\\)"));
+
+        assertThat(generatedSqls.size(), is(equalTo(4)));
 
         for (int i = 0; i < patterns.size(); i++) {
-            final String generatedSql = generatedSqls.get(0);
+            final String generatedSql = generatedSqls.get(i);
             final Pattern pattern = patterns.get(i);
 
-            assertThat(pattern.matcher(generatedSql).matches(), is(true));
+            assertThat(pattern + " does not match " + generatedSql,pattern.matcher(generatedSql).matches(), is(true));
         }
     }
 

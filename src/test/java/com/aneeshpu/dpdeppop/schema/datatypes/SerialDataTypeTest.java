@@ -10,19 +10,12 @@ import java.sql.Statement;
 
 import static com.aneeshpu.dpdeppop.schema.Matchers.aNumber;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-public class IntDataTypeTest {
+public class SerialDataTypeTest {
 
     private Connection connection = new ConnectionFactory().invoke();
 
-    @Test
-    public void generates_an_int_value() {
-
-        final IntDataType anInt = new IntDataType("int");
-        assertNotNull(anInt.generateDefaultValue());
-    }
 
     @Test
     public void retrieves_generated_int_value_from_result_set() throws SQLException {
@@ -36,8 +29,7 @@ public class IntDataTypeTest {
         final ResultSet generatedKeys = statement.getGeneratedKeys();
         generatedKeys.next();
 
-        final IntDataType anInt = new IntDataType("int");
-        assertThat(anInt.getGeneratedValue(generatedKeys, "id"), is(aNumber()));
+        final SerialDataType aSerialType = new SerialDataType("int");
+        assertThat(aSerialType.getGeneratedValue(generatedKeys, "id"), is(aNumber()));
     }
-
 }

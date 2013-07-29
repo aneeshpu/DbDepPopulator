@@ -1,5 +1,8 @@
 package com.aneeshpu.dpdeppop.schema.datatypes;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class SerialDataType implements DataType<Integer>{
     private final String dataType;
 
@@ -11,5 +14,10 @@ public class SerialDataType implements DataType<Integer>{
     @Override
     public Integer generateDefaultValue() {
         return null;
+    }
+
+    @Override
+    public Integer getGeneratedValue(final ResultSet generatedKeys, final String columnName) throws SQLException {
+        return generatedKeys.getInt(columnName);
     }
 }

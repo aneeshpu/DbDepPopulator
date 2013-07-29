@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class Table {
@@ -139,38 +140,77 @@ public class Table {
         return foreignKeys;
     }
 
-    public List<String> generateSQL() {
+    public List<String> insertDefaultValues() throws SQLException {
 
         final List<String> queries = new ArrayList<>();
 
-        generateParentSqls(queries);
+        insertDefaultValuesIntoParentTables(queries);
 
-        final String query = generateInsertForCurrentTable();
+        final String query = insertDefaultValuesIntoCurrentTable();
+
         queries.add(query);
 
         return queries;
     }
 
-    private void generateParentSqls(final List<String> queries) {
+    private void insertDefaultValuesIntoParentTables(final List<String> queries) throws SQLException {
         for (Map.Entry<String, Table> entry : parentTables.entrySet()) {
 
             final Table parentTable = entry.getValue();
-            final List<String> parentSqls = parentTable.generateSQL();
+            final List<String> parentSqls = parentTable.insertDefaultValues();
             queries.addAll(parentSqls);
         }
     }
 
-    private String generateInsertForCurrentTable() {
+    private String insertDefaultValuesIntoCurrentTable() throws SQLException {
+        final String insertSQL = generateInsertQuery();
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("insert query: " + insertSQL);
+        }
+
+        final Statement statement = connection.createStatement();
+        statement.executeUpdate(insertSQL, Statement.RETURN_GENERATED_KEYS);
+
+        final ResultSet generatedKeys = statement.getGeneratedKeys();
+        final Map<String, Column> columnsWithGeneratedValues = getColumnsWithGeneratedValues();
+
+        setGeneratedValuesOnColumns(generatedKeys, columnsWithGeneratedValues);
+        return insertSQL;
+    }
+
+    private void setGeneratedValuesOnColumns(final ResultSet generatedKeys, final Map<String, Column> columnsWithGeneratedValues) throws SQLException {
+        while (generatedKeys.next()) {
+            for (Map.Entry<String, Column> entrySet : columnsWithGeneratedValues.entrySet()) {
+                final Column column = entrySet.getValue();
+                column.populateGeneratedValue(generatedKeys);
+            }
+        }
+    }
+
+    private Map<String, Column> getColumnsWithGeneratedValues() {
+        final HashMap<String, Column> columnsWithGeneratedValues = new HashMap<>();
+        for (Map.Entry<String, Column> entrySet : columns.entrySet()) {
+
+            if (entrySet.getValue().isAutoIncrement()) {
+                columnsWithGeneratedValues.put(entrySet.getKey(), entrySet.getValue());
+            }
+        }
+
+        return columnsWithGeneratedValues;
+    }
+
+    private String generateInsertQuery() {
         final Set<Map.Entry<String, Column>> entrySet = columns.entrySet();
 
-        final StringBuilder fullQuery = new StringBuilder(String.format("insert into %s ",name));
+        final StringBuilder fullQuery = new StringBuilder(String.format("insert into %s ", name));
         StringBuilder columnNamesPartOfQuery = new StringBuilder("(");
         final StringBuilder valuesPartOfQuery = new StringBuilder("(");
 
         for (Map.Entry<String, Column> stringColumnEntry : entrySet) {
 
             final Column column = stringColumnEntry.getValue();
-            if(column.isAutoIncrement()){
+            if (column.isAutoIncrement()) {
                 continue;
             }
 
@@ -194,9 +234,6 @@ public class Table {
         fullQuery.append(valuesPartOfQuery.toString());
 
         final String query = fullQuery.toString();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("namesQuery:" + query);
-        }
         return query;
     }
 

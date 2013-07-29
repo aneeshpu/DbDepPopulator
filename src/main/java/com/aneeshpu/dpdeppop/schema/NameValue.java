@@ -41,7 +41,7 @@ class NameValue {
     }
 
     public String name() {
-        return String.format("'%s'", columnName);
+        return String.format("%s", columnName);
     }
 
     public static NameValue createAutoIncrement() {

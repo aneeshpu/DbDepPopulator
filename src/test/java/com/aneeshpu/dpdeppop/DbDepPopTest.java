@@ -19,7 +19,7 @@ public class DbDepPopTest {
 
         System.out.println(paymentTableResultSetMetaData.getColumnCount());
 
-        printCols(paymentTableResultSetMetaData);
+        printCols(paymentTableResultSetMetaData, "default");
 
         System.out.println("\n");
 
@@ -47,9 +47,9 @@ public class DbDepPopTest {
 
         final ResultSet paymentCrossReference = metaData.getCrossReference(null, null, null, null, null, "payment");
 
-        printCols(paymentCrossReference.getMetaData());
+        printCols(paymentCrossReference.getMetaData(), "default");
 
-        while(paymentCrossReference.next()){
+        while (paymentCrossReference.next()) {
             System.out.print(paymentCrossReference.getString("pktable_name") + "\t");
             System.out.print(paymentCrossReference.getString("pkcolumn_name") + "\t");
             System.out.print(paymentCrossReference.getString("fktable_name") + "\t");
@@ -74,10 +74,23 @@ public class DbDepPopTest {
             }
         }*/
 
+        final String insertSQL = "insert into account (name) values ('c')";
+
+        final Statement statement = connection.createStatement();
+        statement.executeUpdate(insertSQL, Statement.RETURN_GENERATED_KEYS);
+
+        final ResultSet generatedKeys = statement.getGeneratedKeys();
+
+        printCols(generatedKeys.getMetaData(), "insert into account");
+
+        while(generatedKeys.next()){
+            System.out.println(generatedKeys.getString("name"));
+        }
 
     }
 
-    private void printCols(final ResultSetMetaData paymentTableResultSetMetaData) throws SQLException {
+    private void printCols(final ResultSetMetaData paymentTableResultSetMetaData, final String logging_prefix) throws SQLException {
+        System.out.println(logging_prefix);
         for (int i = 1; i <= paymentTableResultSetMetaData.getColumnCount(); i++) {
 //            System.out.print(paymentTableResultSet.getString(i) + "\t");
 //            System.out.println(paymentTableResultSetMetaData.getColumnType(i) + "," + paymentTableResultSetMetaData.getColumnTypeName(i) + "," + paymentTableResultSetMetaData.isNullable(i));

@@ -1,5 +1,8 @@
 package com.aneeshpu.dpdeppop.schema.datatypes;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * Created with IntelliJ IDEA.
  * User: aneeshpu
@@ -11,4 +14,5 @@ public interface DataType<T> {
 
     T generateDefaultValue();
 
+    T getGeneratedValue(ResultSet generatedKeys, final String columnName) throws SQLException;
 }

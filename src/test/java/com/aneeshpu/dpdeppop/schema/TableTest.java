@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import org.apache.log4j.Logger;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -20,6 +21,7 @@ import static org.junit.Assert.assertThat;
 
 public class TableTest {
 
+    private static final Logger LOG = Logger.getLogger(TableTest.class);
     private final Connection connection = new ConnectionFactory().invoke();
     private Table paymentTable;
 
@@ -87,10 +89,6 @@ public class TableTest {
 
         final List<String> generatedSqls = paymentTable.insertDefaultValues();
 
-        for (String generatedSql : generatedSqls) {
-            System.out.println(generatedSql);
-        }
-
         final List<Pattern> patterns = new ArrayList<>();
 
         patterns.add(Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)"));
@@ -104,7 +102,7 @@ public class TableTest {
             final String generatedSql = generatedSqls.get(i);
             final Pattern pattern = patterns.get(i);
 
-            assertThat(pattern + " does not match " + generatedSql,pattern.matcher(generatedSql).matches(), is(true));
+            assertThat(pattern + " does not match " + generatedSql, pattern.matcher(generatedSql).matches(), is(true));
         }
     }
 

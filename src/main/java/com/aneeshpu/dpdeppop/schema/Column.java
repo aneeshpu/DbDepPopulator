@@ -1,9 +1,12 @@
 package com.aneeshpu.dpdeppop.schema;
 
 import com.aneeshpu.dpdeppop.schema.datatypes.DataType;
+import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Column {
     public static final String COLUMN_NAME = "COLUMN_NAME";
@@ -17,10 +20,12 @@ public class Column {
     private double columnSize;
     private Table referencingTable;
     private Column referencingColumn;
-
     private YesNo autoIncrement = new YesNo("NO");
+
     private YesNo isNullable = new YesNo("NO");
     private NameValue nameValue;
+
+    private static final Logger LOG = Logger.getLogger(Column.class);
 
     private Column() {
     }
@@ -104,17 +109,38 @@ public class Column {
         return referencingColumn;
     }
 
-    public NameValue nameValue() {
+    public NameValue nameValue(final HashMap<String, Map<String, Object>> preassignedValues) {
         if (nameValue != null) {
             return nameValue;
+        }
+
+        if (isPreAssigned(preassignedValues)) {
+            return getPreassignedNameValue(preassignedValues);
         }
 
         if (autoIncrement.isTrue()) {
             nameValue = NameValue.createAutoIncrement();
         }
 
-        nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue().value()) : new NameValue(name, dataType.generateDefaultValue());
-        return nameValue;
+        nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue(preassignedValues).value()) : new NameValue(name, dataType.generateDefaultValue());
+        return this.nameValue;
+    }
+
+    private NameValue getPreassignedNameValue(final Map<String, Map<String, Object>> preassignedValues) {
+        final Object preassignedValue = preassignedValues.get(table.name()).get(name);
+
+        return new NameValue(name, preassignedValue);
+    }
+
+    private boolean isPreAssigned(final HashMap<String, Map<String, Object>> preassignedValues) {
+        if (!preassignedValues.containsKey(table.name())) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("No preassigned values for " + table.name());
+            }
+            return false;
+        }
+
+        return preassignedValues.get(table.name()).containsKey(name);
     }
 
     private boolean isForeignKey() {

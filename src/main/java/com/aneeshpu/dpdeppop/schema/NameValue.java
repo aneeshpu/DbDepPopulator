@@ -15,10 +15,10 @@ class NameValue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final NameValue nameValue = (NameValue) o;
+        final NameValue other = (NameValue) o;
 
-        if (columnName != null ? !columnName.equals(nameValue.columnName) : nameValue.columnName != null) return false;
-        if (columnValue != null ? !columnValue.equals(nameValue.columnValue) : nameValue.columnValue != null)
+        if (columnName != null ? !columnName.equals(other.columnName) : other.columnName != null) return false;
+        if (columnValue != null ? !columnValue.equals(other.columnValue) : other.columnValue != null)
             return false;
 
         return true;
@@ -41,10 +41,14 @@ class NameValue {
     }
 
     public String name() {
-        return String.format("%s", columnName);
+        return String.format("%s,", columnName);
     }
 
     public static NameValue createAutoIncrement() {
         return new NameValue("", "");
+    }
+
+    public String formattedQueryString() {
+        return String.format("%s,",columnValue);
     }
 }

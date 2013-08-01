@@ -3,9 +3,12 @@ package com.aneeshpu.dpdeppop.schema;
 import com.aneeshpu.dpdeppop.schema.datatypes.DataType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -16,6 +19,9 @@ import static org.mockito.Mockito.*;
 public class ColumnTest {
 
     private Connection connection = new ConnectionFactory().invoke();
+
+    @Mock
+    private Table table;
 
 
     @Test
@@ -38,8 +44,12 @@ public class ColumnTest {
         final DataType<Float> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn(10f);
 
-        final Column amount = Column.buildColumn().withName("amount").withDataType(dataType).create();
-        final NameValue nameValue = amount.nameValue();
+        final Column amount = Column.buildColumn()
+                .withName("amount")
+                .withDataType(dataType)
+                .withTable(table)
+                .create();
+        final NameValue nameValue = amount.nameValue(new java.util.HashMap<String, java.util.Map<String, Object>>());
 
         assertThat(nameValue, is(equalTo(new NameValue("amount", 10f))));
 
@@ -55,12 +65,61 @@ public class ColumnTest {
         final Column idColumnInInvoiceTable = mock(Column.class);
         final int primaryKeyInInvoiceTable = 123;
 
-        when(idColumnInInvoiceTable.nameValue()).thenReturn(new NameValue("id", primaryKeyInInvoiceTable));
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
+        when(idColumnInInvoiceTable.nameValue(preassignedValues)).thenReturn(new NameValue("id", primaryKeyInInvoiceTable));
 
-        final Column invoiceIdColumn = Column.buildColumn().withName("invoice_id").withReferencingColumn(idColumnInInvoiceTable).withDataType(dataType).create();
-        assertThat(invoiceIdColumn.nameValue(), is(equalTo(new NameValue("invoice_id", primaryKeyInInvoiceTable))));
+        final Column invoiceIdColumn = Column.buildColumn()
+                                    .withName("invoice_id")
+                                    .withReferencingColumn(idColumnInInvoiceTable)
+                                    .withDataType(dataType)
+                                    .withTable(table)
+                                    .create();
+        assertThat(invoiceIdColumn.nameValue(preassignedValues), is(equalTo(new NameValue("invoice_id", primaryKeyInInvoiceTable))));
 
         verify(dataType, never()).generateDefaultValue();
-        verify(idColumnInInvoiceTable).nameValue();
+        verify(idColumnInInvoiceTable).nameValue(preassignedValues);
+    }
+
+    @Test
+    public void creates_a_formatted_query_string(){
+
+        final DataType<String> dataType = mock(DataType.class);
+        when(dataType.generateDefaultValue()).thenReturn("'c'");
+
+        final Column amount = Column.buildColumn()
+                .withName("amount")
+                .withDataType(dataType)
+                .withTable(table)
+                .create();
+        final NameValue nameValue = amount.nameValue(new java.util.HashMap<String, java.util.Map<String, Object>>());
+
+        assertThat(nameValue.formattedQueryString(), is(equalTo("'c',")));
+
+        verify(dataType).generateDefaultValue();
+
+    }
+
+    @Test
+    public void uses_a_preassigned_value_if_passed_in(){
+        final DataType<Float> dataType = mock(DataType.class);
+        when(dataType.generateDefaultValue()).thenReturn(10f);
+
+        final Table table = mock(Table.class);
+        when(table.name()).thenReturn("payment");
+
+        final Column amount = Column.buildColumn().withTable(table).withName("status").withDataType(dataType).create();
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
+        final HashMap<String, Object> values = new HashMap<>();
+        values.put("status", 2);
+
+        preassignedValues.put("payment", values);
+
+        final NameValue nameValue = amount.nameValue(preassignedValues);
+
+        assertThat(nameValue, is(equalTo(new NameValue("status", 2))));
+
+        verify(table, atLeastOnce()).name();
+        verify(dataType, never()).generateDefaultValue();
+
     }
 }

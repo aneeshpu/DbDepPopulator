@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -55,7 +56,7 @@ public class TableTest {
     @Test
     public void foreign_keys_are_populated_with_their_referencing_tables() {
         final Column invoiceId = paymentTable.columns().get("invoice_id");
-        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withName("id").create())));
+        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new Table("invoice", connection)).withName("id").create())));
     }
 
     private Table get(final Map<String, Table> parents, final Table table) {
@@ -74,7 +75,7 @@ public class TableTest {
         final Table accountTable = new Table("account", connection);
         accountTable.initialize();
 
-        final List<String> sql = accountTable.insertDefaultValues();
+        final List<String> sql = accountTable.insertDefaultValues(new HashMap<String, Map<String, Object>>());
         System.out.println(sql.get(0));
 
         final Pattern insertIntoAccountQueryPattern = Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)");
@@ -87,14 +88,18 @@ public class TableTest {
 
         paymentTable.initialize();
 
-        final List<String> generatedSqls = paymentTable.insertDefaultValues();
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
+        final HashMap<String, Object> values = new HashMap<>();
+        values.put("status","2");
+        preassignedValues.put("payment", values);
+        final List<String> generatedSqls = paymentTable.insertDefaultValues(preassignedValues);
 
         final List<Pattern> patterns = new ArrayList<>();
 
         patterns.add(Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)"));
         patterns.add(Pattern.compile("insert into invoice \\(amount,account_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+\\)"));
         patterns.add(Pattern.compile("insert into payment_status \\(id,description,name\\) values \\([-+]?[0-9]*\\.?[0-9]+,'\\w','\\w'\\)"));
-        patterns.add(Pattern.compile("insert into payment \\(amount,status,invoice_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+\\)"));
+        patterns.add(Pattern.compile("insert into payment \\(amount,status,invoice_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,2,[-+]?[0-9]*\\.?[0-9]+\\)"));
 
         assertThat(generatedSqls.size(), is(equalTo(4)));
 

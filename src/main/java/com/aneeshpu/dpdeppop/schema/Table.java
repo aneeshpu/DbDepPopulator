@@ -72,6 +72,7 @@ public class Table {
                     .withIsAutoIncrement(isAutoIncrement)
                     .withReferencingTable(referencingTable)
                     .withReferencingColumn(referencingTable == null ? null : referencingTable.getColumn(primaryKeyColName))
+                    .withTable(this)
                     .create());
         }
     }
@@ -120,7 +121,7 @@ public class Table {
         return columns;
     }
 
-    public Map<String, ColumnTable> foreignKeyTableMap() throws SQLException {
+    private Map<String, ColumnTable> foreignKeyTableMap() throws SQLException {
 
         final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, name);
 
@@ -140,30 +141,30 @@ public class Table {
         return foreignKeys;
     }
 
-    public List<String> insertDefaultValues() throws SQLException {
+    public List<String> insertDefaultValues(final HashMap<String, Map<String, Object>> preassignedValues) throws SQLException {
 
         final List<String> queries = new ArrayList<>();
 
-        insertDefaultValuesIntoParentTables(queries);
+        insertDefaultValuesIntoParentTables(queries,preassignedValues);
 
-        final String query = insertDefaultValuesIntoCurrentTable();
+        final String query = insertDefaultValuesIntoCurrentTable(preassignedValues);
 
         queries.add(query);
 
         return queries;
     }
 
-    private void insertDefaultValuesIntoParentTables(final List<String> queries) throws SQLException {
+    private void insertDefaultValuesIntoParentTables(final List<String> queries, final HashMap<String, Map<String, Object>> preassignedValues) throws SQLException {
         for (Map.Entry<String, Table> entry : parentTables.entrySet()) {
 
             final Table parentTable = entry.getValue();
-            final List<String> parentSqls = parentTable.insertDefaultValues();
+            final List<String> parentSqls = parentTable.insertDefaultValues(preassignedValues);
             queries.addAll(parentSqls);
         }
     }
 
-    private String insertDefaultValuesIntoCurrentTable() throws SQLException {
-        final String insertSQL = generateInsertQuery();
+    private String insertDefaultValuesIntoCurrentTable(final HashMap<String, Map<String, Object>> preassignedValues) throws SQLException {
+        final String insertSQL = generateInsertQuery(preassignedValues);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("insert query: " + insertSQL);
@@ -200,7 +201,7 @@ public class Table {
         return columnsWithGeneratedValues;
     }
 
-    private String generateInsertQuery() {
+    private String generateInsertQuery(final HashMap<String, Map<String, Object>> preassignedValues) {
         final Set<Map.Entry<String, Column>> entrySet = columns.entrySet();
 
         final StringBuilder fullQuery = new StringBuilder(String.format("insert into %s ", name));
@@ -214,13 +215,13 @@ public class Table {
                 continue;
             }
 
-            final NameValue nameValue = column.nameValue();
+            final NameValue nameValue = column.nameValue(preassignedValues);
 
             columnNamesPartOfQuery.append(nameValue.name());
-            columnNamesPartOfQuery.append(",");
+//            columnNamesPartOfQuery.append(",");
 
-            valuesPartOfQuery.append(nameValue.value());
-            valuesPartOfQuery.append(",");
+            valuesPartOfQuery.append(nameValue.formattedQueryString());
+//            valuesPartOfQuery.append(",");
         }
 
         columnNamesPartOfQuery.deleteCharAt(columnNamesPartOfQuery.length() - 1);
@@ -235,6 +236,10 @@ public class Table {
 
         final String query = fullQuery.toString();
         return query;
+    }
+
+    public String name() {
+        return name;
     }
 
     private class ColumnTable {

@@ -3,13 +3,6 @@ package com.aneeshpu.dpdeppop.schema.datatypes;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Created with IntelliJ IDEA.
- * User: aneeshpu
- * Date: 21/7/13
- * Time: 7:21 AM
- * To change this template use File | Settings | File Templates.
- */
 class CharacterDataType implements DataType<String>{
     private final String dataType;
 

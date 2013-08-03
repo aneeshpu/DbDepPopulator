@@ -28,7 +28,7 @@ public class TableTest {
 
     @Before
     public void setup() throws SQLException {
-        paymentTable = new Table("payment", connection);
+        paymentTable = new Table("payment", connection, new HashMap<String, Map<String, Object>>());
         paymentTable.initialize();
     }
 
@@ -44,7 +44,7 @@ public class TableTest {
     @Test
     public void parents_are_initialized_with_their_parents() throws SQLException {
 
-        final Table invoiceTable = get(paymentTable.parents(), new Table("invoice", connection));
+        final Table invoiceTable = get(paymentTable.parents(), new Table("invoice", connection, new HashMap<String, Map<String, Object>>()));
         assertNotNull(invoiceTable.parents().get("account"));
     }
 
@@ -56,7 +56,7 @@ public class TableTest {
     @Test
     public void foreign_keys_are_populated_with_their_referencing_tables() {
         final Column invoiceId = paymentTable.columns().get("invoice_id");
-        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new Table("invoice", connection)).withName("id").create())));
+        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new Table("invoice", connection, new HashMap<String, Map<String, Object>>())).withName("id").create())));
     }
 
     private Table get(final Map<String, Table> parents, final Table table) {
@@ -66,16 +66,17 @@ public class TableTest {
     @Test
     public void creates_a_string_representation_of_table() {
 
-        assertThat(new Table("payment", null).toString(), is(equalTo("payment")));
+        assertThat(new Table("payment", null, new HashMap<String, Map<String, Object>>()).toString(), is(equalTo("payment")));
     }
 
     @Test
     public void generates_an_insert_query() throws SQLException {
 
-        final Table accountTable = new Table("account", connection);
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
+        final Table accountTable = new Table("account", connection, preassignedValues);
         accountTable.initialize();
 
-        final List<String> sql = accountTable.insertDefaultValues(new HashMap<String, Map<String, Object>>());
+        final List<String> sql = accountTable.insertDefaultValues();
         System.out.println(sql.get(0));
 
         final Pattern insertIntoAccountQueryPattern = Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)");
@@ -86,13 +87,15 @@ public class TableTest {
     @Test
     public void generates_insert_sql_for_parent_tables_and_itself() throws SQLException {
 
-        paymentTable.initialize();
-
         final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
         final HashMap<String, Object> values = new HashMap<>();
-        values.put("status","2");
+        values.put("status", "2");
         preassignedValues.put("payment", values);
-        final List<String> generatedSqls = paymentTable.insertDefaultValues(preassignedValues);
+
+        Table paymentTable = new Table("payment", connection, preassignedValues);
+        paymentTable.initialize();
+
+        final List<String> generatedSqls = paymentTable.insertDefaultValues();
 
         final List<Pattern> patterns = new ArrayList<>();
 

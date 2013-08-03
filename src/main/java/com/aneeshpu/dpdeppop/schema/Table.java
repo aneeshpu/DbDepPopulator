@@ -18,12 +18,14 @@ public class Table {
 
     private final String name;
     private final Connection connection;
+    private final HashMap<String, Map<String, Object>> preassignedValues;
     private final Map<String, Table> parentTables;
     private final Map<String, Column> columns;
 
-    public Table(String name, final Connection connection) {
+    public Table(String name, final Connection connection, final HashMap<String, Map<String, Object>> preassignedValues) {
         this.name = name;
         this.connection = connection;
+        this.preassignedValues = preassignedValues;
         parentTables = new HashMap<>();
         columns = new HashMap<>();
     }
@@ -87,7 +89,7 @@ public class Table {
         while (importedKeysResultSet.next()) {
             final String primaryKeyTableName = importedKeysResultSet.getString(PRIMARY_KEY_TABLE_NAME);
 //            parentTables.add(new Table(primaryKeyTableName, connection).initialize());
-            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection).initialize());
+            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection, new HashMap<String, Map<String, Object>>()).initialize());
         }
     }
 
@@ -141,7 +143,7 @@ public class Table {
         return foreignKeys;
     }
 
-    public List<String> insertDefaultValues(final HashMap<String, Map<String, Object>> preassignedValues) throws SQLException {
+    public List<String> insertDefaultValues() throws SQLException {
 
         final List<String> queries = new ArrayList<>();
 
@@ -158,13 +160,13 @@ public class Table {
         for (Map.Entry<String, Table> entry : parentTables.entrySet()) {
 
             final Table parentTable = entry.getValue();
-            final List<String> parentSqls = parentTable.insertDefaultValues(preassignedValues);
+            final List<String> parentSqls = parentTable.insertDefaultValues();
             queries.addAll(parentSqls);
         }
     }
 
     private String insertDefaultValuesIntoCurrentTable(final HashMap<String, Map<String, Object>> preassignedValues) throws SQLException {
-        final String insertSQL = generateInsertQuery(preassignedValues);
+        final String insertSQL = generateInsertQuery();
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("insert query: " + insertSQL);
@@ -201,7 +203,7 @@ public class Table {
         return columnsWithGeneratedValues;
     }
 
-    private String generateInsertQuery(final HashMap<String, Map<String, Object>> preassignedValues) {
+    private String generateInsertQuery() {
         final Set<Map.Entry<String, Column>> entrySet = columns.entrySet();
 
         final StringBuilder fullQuery = new StringBuilder(String.format("insert into %s ", name));
@@ -215,7 +217,7 @@ public class Table {
                 continue;
             }
 
-            final NameValue nameValue = column.nameValue(preassignedValues);
+            final NameValue nameValue = column.nameValue(this.preassignedValues);
 
             columnNamesPartOfQuery.append(nameValue.name());
 //            columnNamesPartOfQuery.append(",");

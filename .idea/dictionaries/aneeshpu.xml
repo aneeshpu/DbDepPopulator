@@ -2,6 +2,7 @@
   <dictionary name="aneeshpu">
     <words>
       <w>nullable</w>
+      <w>sqls</w>
     </words>
   </dictionary>
 </component>

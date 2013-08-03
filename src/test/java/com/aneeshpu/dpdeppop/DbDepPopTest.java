@@ -43,11 +43,11 @@ public class DbDepPopTest {
             System.out.println("\n");
         }
 
-//        final ResultSet paymentCrossReference = metaData.getImportedKeys(null, null, "payment");
+        final ResultSet paymentCrossReference = metaData.getImportedKeys(null, null, "payment");
 
-        final ResultSet paymentCrossReference = metaData.getCrossReference(null, null, null, null, null, "payment");
+//        final ResultSet paymentCrossReference = metaData.getCrossReference(null, null, null, null, null, "payment");
 
-        printCols(paymentCrossReference.getMetaData(), "default");
+        printCols(paymentCrossReference.getMetaData(), "imported_keys");
 
         while (paymentCrossReference.next()) {
             System.out.print(paymentCrossReference.getString("pktable_name") + "\t");

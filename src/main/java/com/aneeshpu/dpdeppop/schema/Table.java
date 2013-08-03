@@ -13,7 +13,7 @@ public class Table {
     public static final Logger LOG = Logger.getLogger(Table.class);
 
     public static final String PRIMARY_KEY_TABLE_NAME = "pktable_name";
-    public static final String PRIMARY_KEY_COL_NAME = "pkcolumn_name";
+    public static final String PRIMARY_KEY_COLUMN_NAME = "pkcolumn_name";
     public static final String FOREIGN_KEY_COLUMN_NAME = "fkcolumn_name";
 
     private final String name;
@@ -88,9 +88,27 @@ public class Table {
 
         while (importedKeysResultSet.next()) {
             final String primaryKeyTableName = importedKeysResultSet.getString(PRIMARY_KEY_TABLE_NAME);
-//            parentTables.add(new Table(primaryKeyTableName, connection).initialize());
-            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection, new HashMap<String, Map<String, Object>>()).initialize());
+            final String foreignKeyColumnName = importedKeysResultSet.getString(FOREIGN_KEY_COLUMN_NAME);
+
+            if (parentTableIsPreassigned(foreignKeyColumnName)) {
+                continue;
+            }
+            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection, preassignedValues).initialize());
         }
+    }
+
+    private boolean parentTableIsPreassigned(final String foreignKeyColumnName) {
+        final Map<String, Object> preassignedCols = preassignedValues.get(name);
+
+        if (preassignedCols == null || preassignedCols.isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("table" + name + " has no preassigned keys.");
+            }
+
+            return false;
+        }
+
+        return preassignedCols.containsKey(foreignKeyColumnName);
     }
 
     public Map<String, Table> parents() {
@@ -131,7 +149,7 @@ public class Table {
         while (crossReference.next()) {
 
             final String primaryKeyTableName = crossReference.getString(PRIMARY_KEY_TABLE_NAME);
-            final String primaryKeyColName = crossReference.getString(PRIMARY_KEY_COL_NAME);
+            final String primaryKeyColName = crossReference.getString(PRIMARY_KEY_COLUMN_NAME);
             final String foreignKeyColumName = crossReference.getString(FOREIGN_KEY_COLUMN_NAME);
 
             final Table primaryTable = parentTables.get(primaryKeyTableName);
@@ -147,7 +165,7 @@ public class Table {
 
         final List<String> queries = new ArrayList<>();
 
-        insertDefaultValuesIntoParentTables(queries,preassignedValues);
+        insertDefaultValuesIntoParentTables(queries, preassignedValues);
 
         final String query = insertDefaultValuesIntoCurrentTable(preassignedValues);
 

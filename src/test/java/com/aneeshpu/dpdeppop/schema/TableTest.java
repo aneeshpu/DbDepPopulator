@@ -90,6 +90,7 @@ public class TableTest {
         final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
         final HashMap<String, Object> values = new HashMap<>();
         values.put("status", "2");
+
         preassignedValues.put("payment", values);
 
         Table paymentTable = new Table("payment", connection, preassignedValues);
@@ -101,10 +102,10 @@ public class TableTest {
 
         patterns.add(Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)"));
         patterns.add(Pattern.compile("insert into invoice \\(amount,account_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+\\)"));
-        patterns.add(Pattern.compile("insert into payment_status \\(id,description,name\\) values \\([-+]?[0-9]*\\.?[0-9]+,'\\w','\\w'\\)"));
+//        patterns.add(Pattern.compile("insert into payment_status \\(id,description,name\\) values \\([-+]?[0-9]*\\.?[0-9]+,'\\w','\\w'\\)"));
         patterns.add(Pattern.compile("insert into payment \\(amount,status,invoice_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,2,[-+]?[0-9]*\\.?[0-9]+\\)"));
 
-        assertThat(generatedSqls.size(), is(equalTo(4)));
+        assertThat(generatedSqls.size(), is(equalTo(patterns.size())));
 
         for (int i = 0; i < patterns.size(); i++) {
             final String generatedSql = generatedSqls.get(i);

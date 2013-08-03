@@ -102,7 +102,7 @@ public class Table {
 
         if (preassignedCols == null || preassignedCols.isEmpty()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("table" + name + " has no preassigned keys.");
+                LOG.debug("table " + name + " has no preassigned keys.");
             }
 
             return false;

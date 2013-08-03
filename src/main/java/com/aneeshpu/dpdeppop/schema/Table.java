@@ -161,14 +161,20 @@ public class Table {
         return foreignKeys;
     }
 
-    public List<String> insertDefaultValues() throws SQLException {
+    public List<String> insertDefaultValues(final boolean onlyPopulateParentTables) throws SQLException {
 
         final List<String> queries = new ArrayList<>();
 
         insertDefaultValuesIntoParentTables(queries, preassignedValues);
 
-        final String query = insertDefaultValuesIntoCurrentTable(preassignedValues);
+        if (onlyPopulateParentTables) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Not populating table " + name + " as onlyPopulateParentTables = " + onlyPopulateParentTables);
+            }
+            return queries;
+        }
 
+        final String query = insertDefaultValuesIntoCurrentTable(preassignedValues);
         queries.add(query);
 
         return queries;
@@ -178,7 +184,7 @@ public class Table {
         for (Map.Entry<String, Table> entry : parentTables.entrySet()) {
 
             final Table parentTable = entry.getValue();
-            final List<String> parentSqls = parentTable.insertDefaultValues();
+            final List<String> parentSqls = parentTable.insertDefaultValues(false);
             queries.addAll(parentSqls);
         }
     }

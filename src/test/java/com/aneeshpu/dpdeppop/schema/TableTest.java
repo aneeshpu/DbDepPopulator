@@ -1,20 +1,16 @@
 package com.aneeshpu.dpdeppop.schema;
 
 import org.apache.log4j.Logger;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
+import static com.aneeshpu.dpdeppop.schema.Matchers.aNumber;
+import static com.aneeshpu.dpdeppop.schema.Matchers.aString;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -76,12 +72,11 @@ public class TableTest {
         final Table accountTable = new Table("account", connection, preassignedValues);
         accountTable.initialize();
 
-        final List<String> sql = accountTable.insertDefaultValues(false);
-        System.out.println(sql.get(0));
+        final Map<String, Table> tables = accountTable.populate(false);
+        final Table generatedAccountTable = tables.get("account");
+        System.out.println(generatedAccountTable);
 
-        final Pattern insertIntoAccountQueryPattern = Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)");
-
-        assertThat(insertIntoAccountQueryPattern.matcher(sql.get(0)).matches(), is(true));
+        assertThat(generatedAccountTable.getColumn("id").value(), is(aNumber()));
     }
 
     @Test
@@ -97,22 +92,19 @@ public class TableTest {
         paymentTable.initialize();
 
         final boolean onlyPopulateParentTables = false;
-        final List<String> generatedSqls = paymentTable.insertDefaultValues(onlyPopulateParentTables);
+        final Map<String, Table> generatedTables = paymentTable.populate(onlyPopulateParentTables);
 
-        final List<Pattern> patterns = new ArrayList<>();
+        final Table account = generatedTables.get("account");
+        assertThat(account.getColumn("name").value(), is(aString()));
 
-        patterns.add(Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)"));
-        patterns.add(Pattern.compile("insert into invoice \\(amount,account_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+\\)"));
-        patterns.add(Pattern.compile("insert into payment \\(amount,status,invoice_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,2,[-+]?[0-9]*\\.?[0-9]+\\)"));
+        final Table invoice = generatedTables.get("invoice");
+        assertThat(invoice.getColumn("amount").value(), is(aNumber()));
+        assertThat(invoice.getColumn("account_id").value(), is(aNumber()));
 
-        assertThat(generatedSqls.size(), is(equalTo(patterns.size())));
-
-        for (int i = 0; i < patterns.size(); i++) {
-            final String generatedSql = generatedSqls.get(i);
-            final Pattern pattern = patterns.get(i);
-
-            assertThat(pattern + " does not match " + generatedSql, pattern.matcher(generatedSql).matches(), is(true));
-        }
+        final Table payment = generatedTables.get("payment");
+        assertThat(payment.getColumn("amount").value(), is(aNumber()));
+        assertThat(Integer.parseInt(String.valueOf(payment.getColumn("status").value())), is(equalTo(2)));
+        assertThat(payment.getColumn("invoice_id").value(), is(aNumber()));
     }
 
     @Test
@@ -127,40 +119,10 @@ public class TableTest {
         paymentTable.initialize();
 
         final boolean onlyPopulateParentTables = true;
-        final List<String> generatedSqls = paymentTable.insertDefaultValues(onlyPopulateParentTables);
+        final Map<String, Table> generatedSqls = paymentTable.populate(onlyPopulateParentTables);
 
-        final List<Pattern> patterns = new ArrayList<>();
-
-        patterns.add(Pattern.compile("insert into account \\(name\\) values \\('\\w'\\)"));
-        patterns.add(Pattern.compile("insert into invoice \\(amount,account_id\\) values \\([-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+\\)"));
-
-        assertThat(generatedSqls.size(), is(equalTo(patterns.size())));
-
-        for (int i = 0; i < patterns.size(); i++) {
-            final String generatedSql = generatedSqls.get(i);
-            final Pattern pattern = patterns.get(i);
-
-            assertThat(pattern + " does not match " + generatedSql, pattern.matcher(generatedSql).matches(), is(true));
-        }
-
+        assertThat(generatedSqls.get("account").getColumn("name").value(), is(aString()));
+        assertThat(generatedSqls.get("invoice").getColumn("amount").value(), is(aNumber()));
+        assertThat(generatedSqls.get("invoice").getColumn("account_id").value(), is(aNumber()));
     }
-
-    private Matcher<? super List<? extends Object>> contains(final Object expectedObject) {
-        return new BaseMatcher<List<? extends Object>>() {
-            @Override
-            public boolean matches(final Object o) {
-                if (!(o instanceof List)) {
-
-                    return false;
-                }
-                List<Object> objects = (List<Object>) o;
-                return objects.contains(expectedObject);
-            }
-
-            @Override
-            public void describeTo(final Description description) {
-            }
-        };
-    }
-
 }

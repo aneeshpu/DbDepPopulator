@@ -79,7 +79,7 @@ public class Table {
         }
     }
 
-    private Column getColumn(final String columnName) {
+    public Column getColumn(final String columnName) {
         return columns.get(columnName);
     }
 
@@ -161,31 +161,30 @@ public class Table {
         return foreignKeys;
     }
 
-    public List<String> insertDefaultValues(final boolean onlyPopulateParentTables) throws SQLException {
+    public Map<String, Table> populate(final boolean onlyPopulateParentTables) throws SQLException {
 
-        final List<String> queries = new ArrayList<>();
-
-        insertDefaultValuesIntoParentTables(queries, preassignedValues);
+        final Map<String,Table> tables = new HashMap<>();
+        insertDefaultValuesIntoParentTables(tables);
 
         if (onlyPopulateParentTables) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Not populating table " + name + " as onlyPopulateParentTables = " + onlyPopulateParentTables);
             }
-            return queries;
+            return tables;
         }
 
-        final String query = insertDefaultValuesIntoCurrentTable(preassignedValues);
-        queries.add(query);
-
-        return queries;
+        insertDefaultValuesIntoCurrentTable(preassignedValues);
+        tables.put(name, this);
+        return tables;
     }
 
-    private void insertDefaultValuesIntoParentTables(final List<String> queries, final HashMap<String, Map<String, Object>> preassignedValues) throws SQLException {
+    private void insertDefaultValuesIntoParentTables(final Map<String, Table> tables) throws SQLException {
         for (Map.Entry<String, Table> entry : parentTables.entrySet()) {
 
             final Table parentTable = entry.getValue();
-            final List<String> parentSqls = parentTable.insertDefaultValues(false);
-            queries.addAll(parentSqls);
+            final Map<String, Table> parentTables = parentTable.populate(false);
+
+            tables.putAll(parentTables);
         }
     }
 
@@ -244,10 +243,7 @@ public class Table {
             final NameValue nameValue = column.nameValue(this.preassignedValues);
 
             columnNamesPartOfQuery.append(nameValue.name());
-//            columnNamesPartOfQuery.append(",");
-
             valuesPartOfQuery.append(nameValue.formattedQueryString());
-//            valuesPartOfQuery.append(",");
         }
 
         columnNamesPartOfQuery.deleteCharAt(columnNamesPartOfQuery.length() - 1);

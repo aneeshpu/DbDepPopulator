@@ -112,18 +112,17 @@ public class Column {
     public NameValue nameValue(final HashMap<String, Map<String, Object>> preassignedValues) {
         if (nameValue != null) {
             return nameValue;
-        }
 
-        if (isPreAssigned(preassignedValues)) {
-            return getPreassignedNameValue(preassignedValues);
-        }
+        } else if (isPreAssigned(preassignedValues)) {
+            nameValue = getPreassignedNameValue(preassignedValues);
 
-        if (autoIncrement.isTrue()) {
+        } else if (autoIncrement.isTrue()) {
             nameValue = NameValue.createAutoIncrement();
-        }
 
-        nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue(preassignedValues).value()) : new NameValue(name, dataType.generateDefaultValue());
-        return this.nameValue;
+        } else {
+            nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue(preassignedValues).value()) : new NameValue(name, dataType.generateDefaultValue());
+        }
+        return nameValue;
     }
 
     private NameValue getPreassignedNameValue(final Map<String, Map<String, Object>> preassignedValues) {
@@ -155,6 +154,10 @@ public class Column {
 
         final Object generatedValue = dataType.getGeneratedValue(generatedKeys, name);
         this.nameValue = new NameValue(name, generatedValue);
+    }
+
+    public Object value() {
+        return nameValue.value();
     }
 
     static class ColumnBuilder {

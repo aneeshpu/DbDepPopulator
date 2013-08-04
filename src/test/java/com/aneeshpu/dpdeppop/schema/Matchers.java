@@ -4,6 +4,9 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 public class Matchers {
     public static Matcher<Object> anInt() {
         return new BaseMatcher<Object>() {
@@ -53,6 +56,7 @@ public class Matchers {
 
             @Override
             public void describeTo(final Description description) {
+                description.appendText("a float");
             }
         };
 
@@ -62,7 +66,44 @@ public class Matchers {
         return new BaseMatcher<Object>() {
             @Override
             public boolean matches(final Object o) {
-                return o instanceof Integer;
+                final Pattern numberPattern = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+");
+                return numberPattern.matcher(String.valueOf(o)).matches();
+            }
+
+            @Override
+            public void describeTo(final Description description) {
+                description.appendText("a number");
+            }
+        };
+    }
+
+
+    public static Matcher<Object> aString() {
+        return new BaseMatcher<Object>() {
+            @Override
+            public boolean matches(final Object o) {
+
+                final Pattern stringPattern = Pattern.compile("'?\\w'?");
+                return stringPattern.matcher(String.valueOf(o)).matches();
+            }
+
+            @Override
+            public void describeTo(final Description description) {
+                description.appendText("a string");
+            }
+        };
+    }
+
+    public static Matcher<? super List<? extends Object>> contains(final Object expectedObject) {
+        return new BaseMatcher<List<? extends Object>>() {
+            @Override
+            public boolean matches(final Object o) {
+                if (!(o instanceof List)) {
+
+                    return false;
+                }
+                List<Object> objects = (List<Object>) o;
+                return objects.contains(expectedObject);
             }
 
             @Override

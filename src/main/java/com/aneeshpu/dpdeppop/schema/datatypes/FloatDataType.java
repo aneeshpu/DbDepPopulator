@@ -14,12 +14,12 @@ public class FloatDataType implements DataType<Float>{
 
     @Override
     public String toString() {
-        return String.valueOf(new Random().nextFloat());
+        return String.valueOf(generateDefaultValue());
     }
 
     @Override
     public Float generateDefaultValue() {
-        return Float.parseFloat(toString());
+        return new Random().nextFloat();
     }
 
     @Override

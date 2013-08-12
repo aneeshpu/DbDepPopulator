@@ -26,8 +26,8 @@ public class Table {
         this.name = name;
         this.connection = connection;
         this.preassignedValues = preassignedValues;
-        parentTables = new HashMap<>();
-        columns = new HashMap<>();
+        parentTables = new HashMap<String, Table>();
+        columns = new HashMap<String, Column>();
     }
 
     public Table initialize() throws SQLException {
@@ -145,7 +145,7 @@ public class Table {
 
         final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, name);
 
-        final Map<String, ColumnTable> foreignKeys = new HashMap<>();
+        final Map<String, ColumnTable> foreignKeys = new HashMap<String, ColumnTable>();
         while (crossReference.next()) {
 
             final String primaryKeyTableName = crossReference.getString(PRIMARY_KEY_TABLE_NAME);
@@ -163,7 +163,7 @@ public class Table {
 
     public Map<String, Table> populate(final boolean onlyPopulateParentTables) throws SQLException {
 
-        final Map<String,Table> tables = new HashMap<>();
+        final Map<String,Table> tables = new HashMap<String, Table>();
         insertDefaultValuesIntoParentTables(tables);
 
         if (onlyPopulateParentTables) {
@@ -173,7 +173,7 @@ public class Table {
             return tables;
         }
 
-        insertDefaultValuesIntoCurrentTable(preassignedValues);
+        insertDefaultValuesIntoCurrentTable();
         tables.put(name, this);
         return tables;
     }
@@ -188,7 +188,7 @@ public class Table {
         }
     }
 
-    private String insertDefaultValuesIntoCurrentTable(final HashMap<String, Map<String, Object>> preassignedValues) throws SQLException {
+    private String insertDefaultValuesIntoCurrentTable() throws SQLException {
         final String insertSQL = generateInsertQuery();
 
         if (LOG.isDebugEnabled()) {
@@ -215,7 +215,7 @@ public class Table {
     }
 
     private Map<String, Column> getColumnsWithGeneratedValues() {
-        final HashMap<String, Column> columnsWithGeneratedValues = new HashMap<>();
+        final HashMap<String, Column> columnsWithGeneratedValues = new HashMap<String, Column>();
         for (Map.Entry<String, Column> entrySet : columns.entrySet()) {
 
             if (entrySet.getValue().isAutoIncrement()) {
@@ -242,8 +242,8 @@ public class Table {
 
             final NameValue nameValue = column.nameValue(this.preassignedValues);
 
-            columnNamesPartOfQuery.append(nameValue.name());
-            valuesPartOfQuery.append(nameValue.formattedQueryString());
+            columnNamesPartOfQuery.append(nameValue.formattedName());
+            valuesPartOfQuery.append(nameValue.formattedValue());
         }
 
         columnNamesPartOfQuery.deleteCharAt(columnNamesPartOfQuery.length() - 1);

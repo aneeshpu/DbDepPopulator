@@ -30,4 +30,10 @@ public class NameValueTest {
         final NameValue amount = new NameValue("amount", "10");
         assertThat(amount.toString(), is(equalTo("amount=10")));
     }
+
+    @Test
+    public void generates_formatted_column_name_string(){
+        final NameValue amount = new NameValue("amount", "10");
+        assertThat(amount.formattedName(), is(equalTo("\"amount\",")));
+    }
 }

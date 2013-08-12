@@ -48,7 +48,11 @@ class NameValue {
         return new NameValue("", "");
     }
 
-    public String formattedQueryString() {
+    public String formattedValue() {
         return String.format("%s,",columnValue);
+    }
+
+    public String formattedName() {
+        return String.format("\"%s\",", columnName);
     }
 }

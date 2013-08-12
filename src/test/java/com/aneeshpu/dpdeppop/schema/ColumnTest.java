@@ -65,7 +65,7 @@ public class ColumnTest {
         final Column idColumnInInvoiceTable = mock(Column.class);
         final int primaryKeyInInvoiceTable = 123;
 
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         when(idColumnInInvoiceTable.nameValue(preassignedValues)).thenReturn(new NameValue("id", primaryKeyInInvoiceTable));
 
         final Column invoiceIdColumn = Column.buildColumn()
@@ -93,7 +93,7 @@ public class ColumnTest {
                 .create();
         final NameValue nameValue = amount.nameValue(new java.util.HashMap<String, java.util.Map<String, Object>>());
 
-        assertThat(nameValue.formattedQueryString(), is(equalTo("'c',")));
+        assertThat(nameValue.formattedValue(), is(equalTo("'c',")));
 
         verify(dataType).generateDefaultValue();
 
@@ -108,8 +108,8 @@ public class ColumnTest {
         when(table.name()).thenReturn("payment");
 
         final Column amount = Column.buildColumn().withTable(table).withName("status").withDataType(dataType).create();
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
-        final HashMap<String, Object> values = new HashMap<>();
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("status", 2);
 
         preassignedValues.put("payment", values);

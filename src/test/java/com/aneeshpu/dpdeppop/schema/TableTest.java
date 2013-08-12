@@ -68,7 +68,7 @@ public class TableTest {
     @Test
     public void generates_an_insert_query() throws SQLException {
 
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final Table accountTable = new Table("account", connection, preassignedValues);
         accountTable.initialize();
 
@@ -82,8 +82,8 @@ public class TableTest {
     @Test
     public void generates_insert_sql_for_parent_tables_and_itself() throws SQLException {
 
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
-        final HashMap<String, Object> values = new HashMap<>();
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("status", "2");
 
         preassignedValues.put("payment", values);
@@ -109,8 +109,8 @@ public class TableTest {
 
     @Test
     public void generates_sqls_only_for_parent_tables() throws SQLException {
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<>();
-        final HashMap<String, Object> values = new HashMap<>();
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("status", "2");
 
         preassignedValues.put("payment", values);
@@ -119,10 +119,10 @@ public class TableTest {
         paymentTable.initialize();
 
         final boolean onlyPopulateParentTables = true;
-        final Map<String, Table> generatedSqls = paymentTable.populate(onlyPopulateParentTables);
+        final Map<String, Table> populatedTables = paymentTable.populate(onlyPopulateParentTables);
 
-        assertThat(generatedSqls.get("account").getColumn("name").value(), is(aString()));
-        assertThat(generatedSqls.get("invoice").getColumn("amount").value(), is(aNumber()));
-        assertThat(generatedSqls.get("invoice").getColumn("account_id").value(), is(aNumber()));
+        assertThat(populatedTables.get("account").getColumn("name").value(), is(aString()));
+        assertThat(populatedTables.get("invoice").getColumn("amount").value(), is(aNumber()));
+        assertThat(populatedTables.get("invoice").getColumn("account_id").value(), is(aNumber()));
     }
 }

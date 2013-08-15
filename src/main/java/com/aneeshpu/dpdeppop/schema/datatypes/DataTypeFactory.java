@@ -7,14 +7,20 @@ public class DataTypeFactory {
         if (dataTypeInLowerCase.startsWith("int")) {
             return new IntDataType(dataType);
 
-        } else if (dataTypeInLowerCase.startsWith("float") || dataTypeInLowerCase.startsWith("money")) {
+        } else if (dataTypeInLowerCase.startsWith("float") || dataTypeInLowerCase.startsWith("money") || dataTypeInLowerCase.startsWith("numeric")) {
             return new FloatDataType(dataType);
 
-        } else if (dataTypeInLowerCase.startsWith("char") || dataTypeInLowerCase.startsWith("varchar") || dataTypeInLowerCase.startsWith("text")) {
+        } else if (dataTypeInLowerCase.startsWith("char") || dataTypeInLowerCase.startsWith("varchar") || dataTypeInLowerCase.startsWith("text") || dataTypeInLowerCase.startsWith("bpchar")) {
             return new CharacterDataType(dataType);
 
         } else if (dataTypeInLowerCase.equalsIgnoreCase("serial")) {
             return new SerialDataType(dataType);
+
+        } else if (dataTypeInLowerCase.startsWith("bool")) {
+            return new BoolDataType();
+
+        } else if (dataTypeInLowerCase.startsWith("time")) {
+            return new DateDataType();
         }
 
         throw new UnknownDataTypeException(dataType + " is not a known datatype");

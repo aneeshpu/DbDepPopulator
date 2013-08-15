@@ -8,6 +8,9 @@ package com.aneeshpu.dpdeppop.schema;
  * To change this template use File | Settings | File Templates.
  */
 class YesNo {
+    public static final String YES = "YES";
+    public static final String NO = "NO";
+
     private final String yesNo;
 
     public YesNo(final String yesNo) {
@@ -16,5 +19,13 @@ class YesNo {
 
     public boolean isTrue() {
         return "YES".equalsIgnoreCase(yesNo);
+    }
+
+    public static YesNo Yes() {
+        return new YesNo("YES");
+    }
+
+    public static YesNo No() {
+        return new YesNo("NO");
     }
 }

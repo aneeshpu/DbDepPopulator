@@ -93,6 +93,16 @@ public class DataTypeFactoryTest {
 
     }
 
+    @Test
+    public void creates_bool_data_type(){
+        final DataType bool = DataTypeFactory.create("bool");
+        assertNotNull(bool);
+        final Class<? extends DataType> aClass = bool.getClass();
+        final Class<BoolDataType> obj = BoolDataType.class;
+        assertTrue(aClass.equals(obj));
+
+    }
+
     @Test(expected = UnknownDataTypeException.class)
     public void throws_exception_for_unknown_data_types(){
         DataTypeFactory.create("foo");

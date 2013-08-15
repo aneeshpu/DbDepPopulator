@@ -24,7 +24,7 @@ public class TableTest {
 
     @Before
     public void setup() throws SQLException {
-        paymentTable = new Table("payment", connection, new HashMap<String, Map<String, Object>>());
+        paymentTable = new Table("payment", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection));
         paymentTable.initialize();
     }
 
@@ -40,7 +40,7 @@ public class TableTest {
     @Test
     public void parents_are_initialized_with_their_parents() throws SQLException {
 
-        final Table invoiceTable = get(paymentTable.parents(), new Table("invoice", connection, new HashMap<String, Map<String, Object>>()));
+        final Table invoiceTable = get(paymentTable.parents(), new Table("invoice", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection)));
         assertNotNull(invoiceTable.parents().get("account"));
     }
 
@@ -52,7 +52,7 @@ public class TableTest {
     @Test
     public void foreign_keys_are_populated_with_their_referencing_tables() {
         final Column invoiceId = paymentTable.columns().get("invoice_id");
-        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new Table("invoice", connection, new HashMap<String, Map<String, Object>>())).withName("id").create())));
+        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new Table("invoice", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection))).withName("id").create())));
     }
 
     private Table get(final Map<String, Table> parents, final Table table) {
@@ -62,14 +62,14 @@ public class TableTest {
     @Test
     public void creates_a_string_representation_of_table() {
 
-        assertThat(new Table("payment", null, new HashMap<String, Map<String, Object>>()).toString(), is(equalTo("payment")));
+        assertThat(new Table("payment", null, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection)).toString(), is(equalTo("payment")));
     }
 
     @Test
     public void generates_an_insert_query() throws SQLException {
 
         final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final Table accountTable = new Table("account", connection, preassignedValues);
+        final Table accountTable = new Table("account", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
         accountTable.initialize();
 
         final Map<String, Table> tables = accountTable.populate(false);
@@ -88,7 +88,7 @@ public class TableTest {
 
         preassignedValues.put("payment", values);
 
-        Table paymentTable = new Table("payment", connection, preassignedValues);
+        Table paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
         paymentTable.initialize();
 
         final boolean onlyPopulateParentTables = false;
@@ -108,6 +108,34 @@ public class TableTest {
     }
 
     @Test
+    public void generates_insert_sql_for_parent_and_itself_with_primary_key_based_col_creation_strategy() throws SQLException {
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("status", "2");
+
+        preassignedValues.put("payment", values);
+
+        Table paymentTable = new Table("payment", connection, preassignedValues, new DoNotGeneratePrimaryKeys(connection));
+        paymentTable.initialize();
+
+        final boolean onlyPopulateParentTables = false;
+        final Map<String, Table> generatedTables = paymentTable.populate(onlyPopulateParentTables);
+
+        final Table account = generatedTables.get("account");
+        assertThat(account.getColumn("name").value(), is(aString()));
+
+        final Table invoice = generatedTables.get("invoice");
+        assertThat(invoice.getColumn("amount").value(), is(aNumber()));
+        assertThat(invoice.getColumn("account_id").value(), is(aNumber()));
+
+        final Table payment = generatedTables.get("payment");
+        assertThat(payment.getColumn("amount").value(), is(aNumber()));
+        assertThat(Integer.parseInt(String.valueOf(payment.getColumn("status").value())), is(equalTo(2)));
+        assertThat(payment.getColumn("invoice_id").value(), is(aNumber()));
+
+    }
+
+    @Test
     public void generates_sqls_only_for_parent_tables() throws SQLException {
         final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final HashMap<String, Object> values = new HashMap<String, Object>();
@@ -115,7 +143,7 @@ public class TableTest {
 
         preassignedValues.put("payment", values);
 
-        Table paymentTable = new Table("payment", connection, preassignedValues);
+        Table paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
         paymentTable.initialize();
 
         final boolean onlyPopulateParentTables = true;

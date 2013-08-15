@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Column {
@@ -109,7 +108,7 @@ public class Column {
         return referencingColumn;
     }
 
-    public NameValue nameValue(final HashMap<String, Map<String, Object>> preassignedValues) {
+    public NameValue nameValue(final Map<String, Map<String, Object>> preassignedValues) {
         if (nameValue != null) {
             return nameValue;
 
@@ -131,7 +130,7 @@ public class Column {
         return new NameValue(name, preassignedValue);
     }
 
-    private boolean isPreAssigned(final HashMap<String, Map<String, Object>> preassignedValues) {
+    private boolean isPreAssigned(final Map<String, Map<String, Object>> preassignedValues) {
         if (!preassignedValues.containsKey(table.name())) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("No preassigned values for " + table.name());
@@ -160,7 +159,7 @@ public class Column {
         return nameValue.value();
     }
 
-    static class ColumnBuilder {
+    public static class ColumnBuilder {
 
         private final Column column;
 

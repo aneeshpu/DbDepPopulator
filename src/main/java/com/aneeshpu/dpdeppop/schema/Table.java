@@ -1,13 +1,14 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.datatypes.DataTypeFactory;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class Table {
     public static final Logger LOG = Logger.getLogger(Table.class);
@@ -18,23 +19,26 @@ public class Table {
 
     private final String name;
     private final Connection connection;
-    private final HashMap<String, Map<String, Object>> preassignedValues;
+    private final Map<String, Map<String, Object>> preassignedValues;
     private final Map<String, Table> parentTables;
     private final Map<String, Column> columns;
+    private final ColumnCreationStrategy columnCreationStrategy;
 
-    public Table(String name, final Connection connection, final HashMap<String, Map<String, Object>> preassignedValues) {
+    public Table(String name, final Connection connection, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy) {
         this.name = name;
         this.connection = connection;
         this.preassignedValues = preassignedValues;
         parentTables = new HashMap<String, Table>();
         columns = new HashMap<String, Column>();
+        this.columnCreationStrategy = columnCreationStrategy;
     }
 
     public Table initialize() throws SQLException {
 
         try {
             populateParents();
-            populateColumns();
+            final Map<String, Column> stringColumnHashMap = columnCreationStrategy.populateColumns(this, parentTables);
+            columns.putAll(stringColumnHashMap);
 
             return this;
 
@@ -45,38 +49,8 @@ public class Table {
         }
     }
 
-    private void populateColumns() throws SQLException {
-
-        final Map<String, ColumnTable> foreignKeyTables = foreignKeyTableMap();
-
-        final ResultSet columnsResultset = connection.getMetaData().getColumns(null, null, name, null);
-
-        while (columnsResultset.next()) {
-            final String columnName = columnsResultset.getString(Column.COLUMN_NAME);
-            final String dataType = columnsResultset.getString(Column.TYPE_NAME);
-            final String columnSize = columnsResultset.getString(Column.COLUMN_SIZE);
-            final String isNullable = columnsResultset.getString(Column.IS_NULLABLE);
-            final String isAutoIncrement = columnsResultset.getString(Column.IS_AUTOINCREMENT);
-
-            final ColumnTable columnTable = foreignKeyTables.get(columnName);
-            Table referencingTable = null;
-            String primaryKeyColName = null;
-
-            if (columnTable != null) {
-                referencingTable = columnTable.getPrimaryTable();
-                primaryKeyColName = columnTable.getPrimaryKeyColName();
-            }
-
-            columns.put(columnName, Column.buildColumn().withName(columnName)
-                    .withDataType(DataTypeFactory.create(dataType))
-                    .withSize(Double.valueOf(columnSize))
-                    .withIsNullable(isNullable)
-                    .withIsAutoIncrement(isAutoIncrement)
-                    .withReferencingTable(referencingTable)
-                    .withReferencingColumn(referencingTable == null ? null : referencingTable.getColumn(primaryKeyColName))
-                    .withTable(this)
-                    .create());
-        }
+    String getName() {
+        return name;
     }
 
     public Column getColumn(final String columnName) {
@@ -93,7 +67,7 @@ public class Table {
             if (parentTableIsPreassigned(foreignKeyColumnName)) {
                 continue;
             }
-            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection, preassignedValues).initialize());
+            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection, preassignedValues, columnCreationStrategy).initialize());
         }
     }
 
@@ -141,29 +115,9 @@ public class Table {
         return columns;
     }
 
-    private Map<String, ColumnTable> foreignKeyTableMap() throws SQLException {
-
-        final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, name);
-
-        final Map<String, ColumnTable> foreignKeys = new HashMap<String, ColumnTable>();
-        while (crossReference.next()) {
-
-            final String primaryKeyTableName = crossReference.getString(PRIMARY_KEY_TABLE_NAME);
-            final String primaryKeyColName = crossReference.getString(PRIMARY_KEY_COLUMN_NAME);
-            final String foreignKeyColumName = crossReference.getString(FOREIGN_KEY_COLUMN_NAME);
-
-            final Table primaryTable = parentTables.get(primaryKeyTableName);
-
-            foreignKeys.put(foreignKeyColumName, new ColumnTable(primaryKeyColName, primaryTable));
-        }
-
-
-        return foreignKeys;
-    }
-
     public Map<String, Table> populate(final boolean onlyPopulateParentTables) throws SQLException {
 
-        final Map<String,Table> tables = new HashMap<String, Table>();
+        final Map<String, Table> tables = new HashMap<String, Table>();
         insertDefaultValuesIntoParentTables(tables);
 
         if (onlyPopulateParentTables) {
@@ -264,22 +218,4 @@ public class Table {
         return name;
     }
 
-    private class ColumnTable {
-        private final String primaryKeyColName;
-
-        private final Table primaryTable;
-
-        public ColumnTable(final String primaryKeyColName, final Table primaryTable) {
-            this.primaryKeyColName = primaryKeyColName;
-            this.primaryTable = primaryTable;
-        }
-
-        private Table getPrimaryTable() {
-            return primaryTable;
-        }
-
-        private String getPrimaryKeyColName() {
-            return primaryKeyColName;
-        }
-    }
 }

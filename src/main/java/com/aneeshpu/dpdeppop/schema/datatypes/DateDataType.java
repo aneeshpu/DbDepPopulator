@@ -4,14 +4,14 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class DateDataType implements DataType<Date> {
+public class DateDataType implements DataType<String> {
     @Override
-    public Date generateDefaultValue() {
-        return new Date(new java.util.Date().getTime());
+    public String generateDefaultValue() {
+        return String.format("'%s'",new Date(new java.util.Date().getTime()));
     }
 
     @Override
-    public Date getGeneratedValue(final ResultSet generatedKeys, final String columnName) throws SQLException {
-        return generatedKeys.getDate(columnName);
+    public String getGeneratedValue(final ResultSet generatedKeys, final String columnName) throws SQLException {
+        return generatedKeys.getString(columnName);
     }
 }

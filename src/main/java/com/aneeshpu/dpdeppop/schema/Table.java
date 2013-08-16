@@ -6,9 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Table {
     public static final Logger LOG = Logger.getLogger(Table.class);
@@ -16,6 +14,7 @@ public class Table {
     public static final String PRIMARY_KEY_TABLE_NAME = "pktable_name";
     public static final String PRIMARY_KEY_COLUMN_NAME = "pkcolumn_name";
     public static final String FOREIGN_KEY_COLUMN_NAME = "fkcolumn_name";
+    public static final String COLUMN_NAME = "column_name";
 
     private final String name;
     private final Connection connection;
@@ -150,12 +149,12 @@ public class Table {
         }
 
         final Statement statement = connection.createStatement();
-        statement.executeUpdate(insertSQL, Statement.RETURN_GENERATED_KEYS);
+//        statement.executeUpdate(insertSQL, Statement.RETURN_GENERATED_KEYS);
+        statement.execute(insertSQL);
 
-        final ResultSet generatedKeys = statement.getGeneratedKeys();
-        final Map<String, Column> columnsWithGeneratedValues = getColumnsWithGeneratedValues();
-
-        setGeneratedValuesOnColumns(generatedKeys, columnsWithGeneratedValues);
+//        final ResultSet generatedKeys = statement.getGeneratedKeys();
+        final ResultSet generatedKeys = statement.getResultSet();
+        setGeneratedValuesOnColumns(generatedKeys, getColumnsWithGeneratedValues());
         return insertSQL;
     }
 
@@ -180,10 +179,10 @@ public class Table {
         return columnsWithGeneratedValues;
     }
 
-    private String generateInsertQuery() {
+    private String generateInsertQuery() throws SQLException {
         final Set<Map.Entry<String, Column>> entrySet = columns.entrySet();
 
-        final StringBuilder fullQuery = new StringBuilder(String.format("insert into %s ", name));
+        final StringBuilder fullQuery = new StringBuilder(String.format("insert into \"%s\" ", name));
         StringBuilder columnNamesPartOfQuery = new StringBuilder("(");
         final StringBuilder valuesPartOfQuery = new StringBuilder("(");
 
@@ -209,6 +208,8 @@ public class Table {
         fullQuery.append(columnNamesPartOfQuery.toString());
         fullQuery.append(" values ");
         fullQuery.append(valuesPartOfQuery.toString());
+        //TODO: add a formatted query string method for primary keys
+        fullQuery.append(" returning \"" + getPrimaryKeys().get(0) + "\"");
 
         final String query = fullQuery.toString();
         return query;
@@ -218,4 +219,16 @@ public class Table {
         return name;
     }
 
+    public List<String> getPrimaryKeys() throws SQLException {
+        final ResultSet primaryKeysResultSet = connection.getMetaData().getPrimaryKeys(null, null, name);
+
+        final List<String> primaryKeys = new ArrayList<String>();
+        while (primaryKeysResultSet.next()) {
+            final String primaryKey = primaryKeysResultSet.getString(Table.COLUMN_NAME);
+            primaryKeys.add(primaryKey);
+        }
+
+        return primaryKeys;
+
+    }
 }

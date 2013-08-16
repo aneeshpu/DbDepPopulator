@@ -111,4 +111,22 @@ public class Matchers {
             }
         };
     }
+
+    public static Matcher<String> date() {
+        return new BaseMatcher<String>() {
+            @Override
+            public boolean matches(final Object o) {
+                if (!(o instanceof String))
+                    return false;
+
+                String possibleDatePattern = (String)o;
+                final Pattern dashSeparatedDate = Pattern.compile("'?\\d+-\\d+-\\d+'?");
+                return dashSeparatedDate.matcher(possibleDatePattern).matches();
+            }
+
+            @Override
+            public void describeTo(final Description description) {
+            }
+        };
+    }
 }

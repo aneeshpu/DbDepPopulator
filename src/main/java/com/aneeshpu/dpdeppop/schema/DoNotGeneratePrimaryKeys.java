@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,6 @@ import java.util.Map;
 public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy implements ColumnCreationStrategy {
 
     public static final Logger LOG = Logger.getLogger(DoNotGeneratePrimaryKeys.class);
-
-    public static final String COLUMN_NAME = "column_name";
 
     public DoNotGeneratePrimaryKeys(final Connection connection) {
         super(connection);
@@ -66,14 +63,6 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
     }
 
     private List<String> primaryKeys(final Table table) throws SQLException {
-        final ResultSet primaryKeysResultSet = getConnection().getMetaData().getPrimaryKeys(null, null, table.getName());
-
-        final List<String> primaryKeys = new ArrayList<String>();
-        while (primaryKeysResultSet.next()) {
-            final String primaryKey = primaryKeysResultSet.getString(COLUMN_NAME);
-            primaryKeys.add(primaryKey);
-        }
-
-        return primaryKeys;
+        return table.getPrimaryKeys();
     }
 }

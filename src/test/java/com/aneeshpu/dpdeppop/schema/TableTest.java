@@ -7,10 +7,12 @@ import org.junit.Test;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.aneeshpu.dpdeppop.schema.Matchers.aNumber;
 import static com.aneeshpu.dpdeppop.schema.Matchers.aString;
+import static com.aneeshpu.dpdeppop.schema.Matchers.contains;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -152,5 +154,11 @@ public class TableTest {
         assertThat(populatedTables.get("account").getColumn("name").value(), is(aString()));
         assertThat(populatedTables.get("invoice").getColumn("amount").value(), is(aNumber()));
         assertThat(populatedTables.get("invoice").getColumn("account_id").value(), is(aNumber()));
+    }
+
+    @Test
+    public void identifies_its_own_primary_keys() throws SQLException {
+        final List<String> primaryKeys = paymentTable.getPrimaryKeys();
+        assertThat(primaryKeys, contains("id"));
     }
 }

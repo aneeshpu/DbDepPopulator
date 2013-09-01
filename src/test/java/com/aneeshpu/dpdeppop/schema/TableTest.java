@@ -7,12 +7,11 @@ import org.junit.Test;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.aneeshpu.dpdeppop.schema.Matchers.aNumber;
-import static com.aneeshpu.dpdeppop.schema.Matchers.aString;
-import static com.aneeshpu.dpdeppop.schema.Matchers.contains;
+import static com.aneeshpu.dpdeppop.schema.Matchers.*;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -27,7 +26,7 @@ public class TableTest {
     @Before
     public void setup() throws SQLException {
         paymentTable = new Table("payment", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection));
-        paymentTable.initialize();
+        paymentTable.initialize(new LinkedHashMap<String, Table>());
     }
 
     @Test
@@ -70,9 +69,9 @@ public class TableTest {
     @Test
     public void generates_an_insert_query() throws SQLException {
 
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final Table accountTable = new Table("account", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-        accountTable.initialize();
+        accountTable.initialize(new LinkedHashMap<String, Table>());
 
         final Map<String, Table> tables = accountTable.populate(false);
         final Table generatedAccountTable = tables.get("account");
@@ -84,14 +83,14 @@ public class TableTest {
     @Test
     public void generates_insert_sql_for_parent_tables_and_itself() throws SQLException {
 
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final HashMap<String, Object> values = new HashMap<String, Object>();
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Map<String, Object> values = new HashMap<String, Object>();
         values.put("status", "2");
 
         preassignedValues.put("payment", values);
 
         Table paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-        paymentTable.initialize();
+        paymentTable.initialize(new LinkedHashMap<String, Table>());
 
         final boolean onlyPopulateParentTables = false;
         final Map<String, Table> generatedTables = paymentTable.populate(onlyPopulateParentTables);
@@ -111,14 +110,14 @@ public class TableTest {
 
     @Test
     public void generates_insert_sql_for_parent_and_itself_with_primary_key_based_col_creation_strategy() throws SQLException {
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final HashMap<String, Object> values = new HashMap<String, Object>();
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Map<String, Object> values = new HashMap<String, Object>();
         values.put("status", "2");
 
         preassignedValues.put("payment", values);
 
         Table paymentTable = new Table("payment", connection, preassignedValues, new DoNotGeneratePrimaryKeys(connection));
-        paymentTable.initialize();
+        paymentTable.initialize(new LinkedHashMap<String, Table>());
 
         final boolean onlyPopulateParentTables = false;
         final Map<String, Table> generatedTables = paymentTable.populate(onlyPopulateParentTables);
@@ -139,14 +138,14 @@ public class TableTest {
 
     @Test
     public void generates_sqls_only_for_parent_tables() throws SQLException {
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final HashMap<String, Object> values = new HashMap<String, Object>();
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Map<String, Object> values = new HashMap<String, Object>();
         values.put("status", "2");
 
         preassignedValues.put("payment", values);
 
         Table paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-        paymentTable.initialize();
+        paymentTable.initialize(new LinkedHashMap<String, Table>());
 
         final boolean onlyPopulateParentTables = true;
         final Map<String, Table> populatedTables = paymentTable.populate(onlyPopulateParentTables);
@@ -160,5 +159,26 @@ public class TableTest {
     public void identifies_its_own_primary_keys() throws SQLException {
         final List<String> primaryKeys = paymentTable.getPrimaryKeys();
         assertThat(primaryKeys, contains("id"));
+    }
+
+    @Test
+    public void keeps_track_of_ancestry() throws SQLException {
+
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Table refundTable = new Table("refund", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
+        refundTable.initialize(new LinkedHashMap<String, Table>());
+        final Map<String, Table> populatedTables = refundTable.populate(false);
+
+        final Table populatedRefundTable = populatedTables.get("refund");
+        final Column accountAssociatedWithRefund = populatedRefundTable.getColumn("account_id");
+
+        final Table populatedInvoiceTable = populatedTables.get("invoice");
+        final Column accountAssociatedWithInvoice = populatedInvoiceTable.getColumn("account_id");
+
+        System.out.println("Account associated with invoice:" + accountAssociatedWithInvoice.value());
+        System.out.println("Account associated with refund:" + accountAssociatedWithRefund.value());
+
+        //TODO: Fix Column.toString()
+        assertThat(accountAssociatedWithInvoice.value(), is(equalTo(accountAssociatedWithRefund.value())));
     }
 }

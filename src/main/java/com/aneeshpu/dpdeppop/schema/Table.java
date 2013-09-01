@@ -19,7 +19,7 @@ public class Table {
     private final String name;
     private final Connection connection;
     private final Map<String, Map<String, Object>> preassignedValues;
-    private final Map<String, Table> parentTables;
+    private Map<String, Table> parentTables;
     private final Map<String, Column> columns;
     private final ColumnCreationStrategy columnCreationStrategy;
 
@@ -27,16 +27,16 @@ public class Table {
         this.name = name;
         this.connection = connection;
         this.preassignedValues = preassignedValues;
-        parentTables = new HashMap<String, Table>();
+//        parentTables = new HashMap<String, Table>();
         columns = new HashMap<String, Column>();
         this.columnCreationStrategy = columnCreationStrategy;
     }
 
-    public Table initialize() throws SQLException {
+    public Table initialize(final Map<String, Table> parentTables) throws SQLException {
 
         try {
-            populateParents();
-            final Map<String, Column> stringColumnHashMap = columnCreationStrategy.populateColumns(this, parentTables);
+            this.parentTables = populateParents(parentTables);
+            final Map<String, Column> stringColumnHashMap = columnCreationStrategy.populateColumns(this, this.parentTables);
             columns.putAll(stringColumnHashMap);
 
             return this;
@@ -56,18 +56,25 @@ public class Table {
         return columns.get(columnName);
     }
 
-    private void populateParents() throws SQLException {
+    private Map<String, Table> populateParents(final Map<String, Table> parentTables) throws SQLException {
         final ResultSet importedKeysResultSet = connection.getMetaData().getImportedKeys(null, null, name);
 
         while (importedKeysResultSet.next()) {
             final String primaryKeyTableName = importedKeysResultSet.getString(PRIMARY_KEY_TABLE_NAME);
             final String foreignKeyColumnName = importedKeysResultSet.getString(FOREIGN_KEY_COLUMN_NAME);
 
-            if (parentTableIsPreassigned(foreignKeyColumnName)) {
+            if (parentTableIsPreassigned(foreignKeyColumnName) || parentTables.containsKey(primaryKeyTableName)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(foreignKeyColumnName + " is either pre-assigned or " + primaryKeyTableName + " has already been initialized");
+                }
                 continue;
             }
-            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection, preassignedValues, columnCreationStrategy).initialize());
+
+            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection, preassignedValues, columnCreationStrategy).initialize(parentTables));
         }
+
+        return parentTables;
+
     }
 
     private boolean parentTableIsPreassigned(final String foreignKeyColumnName) {
@@ -127,15 +134,20 @@ public class Table {
         }
 
         insertDefaultValuesIntoCurrentTable();
+
         tables.put(name, this);
         return tables;
     }
 
     private void insertDefaultValuesIntoParentTables(final Map<String, Table> tables) throws SQLException {
+
         for (Map.Entry<String, Table> entry : parentTables.entrySet()) {
 
             final Table parentTable = entry.getValue();
-            final Map<String, Table> parentTables = parentTable.populate(false);
+//            final Map<String, Table> parentTables = parentTable.populate(false);
+            parentTable.insertDefaultValuesIntoCurrentTable();
+            tables.put(parentTable.name, parentTable);
+//            final Map<String, Table> parentTables = parentTable.populate(false);
 
             tables.putAll(parentTables);
         }
@@ -168,7 +180,7 @@ public class Table {
     }
 
     private Map<String, Column> getColumnsWithGeneratedValues() {
-        final HashMap<String, Column> columnsWithGeneratedValues = new HashMap<String, Column>();
+        final Map<String, Column> columnsWithGeneratedValues = new HashMap<String, Column>();
         for (Map.Entry<String, Column> entrySet : columns.entrySet()) {
 
             if (entrySet.getValue().isAutoIncrement()) {
@@ -209,10 +221,9 @@ public class Table {
         fullQuery.append(" values ");
         fullQuery.append(valuesPartOfQuery.toString());
         //TODO: add a formatted query string method for primary keys
-        fullQuery.append(" returning \"" + getPrimaryKeys().get(0) + "\"");
+        fullQuery.append(" returning \"").append(getPrimaryKeys().get(0)).append("\"");
 
-        final String query = fullQuery.toString();
-        return query;
+        return fullQuery.toString();
     }
 
     public String name() {

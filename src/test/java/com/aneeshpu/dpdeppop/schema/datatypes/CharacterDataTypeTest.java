@@ -23,7 +23,7 @@ public class CharacterDataTypeTest {
         final CharacterDataType characterDataType = new CharacterDataType("character");
         final String defaultValue = characterDataType.generateDefaultValue();
         assertNotNull(defaultValue);
-        assertThat(defaultValue, is(equalTo("'c'")));
+        assertThat(defaultValue, is(equalTo("'s'")));
     }
 
     @Test

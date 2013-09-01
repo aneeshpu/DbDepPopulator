@@ -15,7 +15,7 @@ class CharacterDataType implements DataType<String>{
     public String toString() {
         //TODO:A better way of generating random Strings. It is set to one character now, so that I don't
         //have to worry about column lengths
-        return "c";
+        return "s";
     }
 
     @Override

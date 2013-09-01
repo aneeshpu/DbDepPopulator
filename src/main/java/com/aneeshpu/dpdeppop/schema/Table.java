@@ -242,4 +242,19 @@ public class Table {
         return primaryKeys;
 
     }
+
+    public void delete() {
+/*
+        for (Map.Entry<String, Table> parentTablesEntrySet : parentTables.entrySet()) {
+            final Table parentTable = parentTablesEntrySet.getValue();
+            parentTable.delete();
+        }
+*/
+
+    }
+
+    public boolean isPrimaryKey(final String columnName) throws SQLException {
+        final List<String> primaryKeys = getPrimaryKeys();
+        return primaryKeys.contains(columnName);
+    }
 }

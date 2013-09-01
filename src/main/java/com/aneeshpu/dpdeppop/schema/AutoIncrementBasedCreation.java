@@ -47,6 +47,7 @@ public class AutoIncrementBasedCreation extends AbstractColumnCreationStrategy i
                     .withReferencingTable(referencingTable)
                     .withReferencingColumn(referencingTable == null ? null : referencingTable.getColumn(primaryKeyColName))
                     .withTable(table)
+                    .asPrimaryKey(table.isPrimaryKey(columnName))
                     .create());
         }
 

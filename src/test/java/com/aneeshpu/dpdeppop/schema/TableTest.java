@@ -5,17 +5,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Statement;
+import java.util.*;
 
 import static com.aneeshpu.dpdeppop.schema.Matchers.*;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class TableTest {
 
@@ -180,5 +180,43 @@ public class TableTest {
 
         //TODO: Fix Column.toString()
         assertThat(accountAssociatedWithInvoice.value(), is(equalTo(accountAssociatedWithRefund.value())));
+    }
+
+    @Test
+    public void deletes_generated_records() throws SQLException {
+
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Table refundTable = new Table("refund", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
+        refundTable.initialize(new LinkedHashMap<String, Table>());
+        final Map<String, Table> populatedTables = refundTable.populate(false);
+
+        refundTable.delete();
+
+        final Statement statement = connection.createStatement();
+        for (Map.Entry<String, Table> entrySet : populatedTables.entrySet()) {
+            final String query = String.format("select count(*) from %s where id=%s", entrySet.getKey(), entrySet.getValue().getColumn("id").value());
+            System.out.println("query:" + query);
+            statement.execute(query);
+            assertNoRows(statement.getResultSet());
+        }
+
+        statement.close();
+    }
+
+    private void assertNoRows(final ResultSet resultSet) throws SQLException {
+        while (resultSet.next()) {
+            final int count = resultSet.getInt(1);
+            assertThat(count, is(equalTo(0)));
+        }
+    }
+
+    @Test
+    public void primary_keys_are_marked() throws SQLException {
+
+        final Table accountTable = new Table("account", connection, Collections.<String, Map<String, Object>>emptyMap(), new DoNotGeneratePrimaryKeys(connection));
+        accountTable.initialize(new LinkedHashMap<String, Table>());
+        final Map<String, Table> populatedTables = accountTable.populate(false);
+
+        assertTrue(populatedTables.get("account").getColumn("id").isPrimaryKey());
     }
 }

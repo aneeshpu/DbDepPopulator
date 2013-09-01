@@ -13,6 +13,7 @@ abstract class AbstractColumnCreationStrategy {
         this.connection = connection;
     }
 
+    //TODO: Move this to Table.
     Map<String, ColumnTable> foreignKeyTableMap(final String tableName, final Map<String, Table> parentTables) throws SQLException {
 
         final ResultSet crossReference = this.connection.getMetaData().getCrossReference(null, null, null, null, null, tableName);
@@ -22,11 +23,11 @@ abstract class AbstractColumnCreationStrategy {
 
             final String primaryKeyTableName = crossReference.getString(Table.PRIMARY_KEY_TABLE_NAME);
             final String primaryKeyColName = crossReference.getString(Table.PRIMARY_KEY_COLUMN_NAME);
-            final String foreignKeyColumName = crossReference.getString(Table.FOREIGN_KEY_COLUMN_NAME);
+            final String foreignKeyColumnName = crossReference.getString(Table.FOREIGN_KEY_COLUMN_NAME);
 
             final Table primaryTable = parentTables.get(primaryKeyTableName);
 
-            foreignKeys.put(foreignKeyColumName, new ColumnTable(primaryKeyColName, primaryTable));
+            foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColName, primaryTable));
         }
 
 

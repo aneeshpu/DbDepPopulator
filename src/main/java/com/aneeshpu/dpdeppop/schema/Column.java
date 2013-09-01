@@ -25,6 +25,7 @@ public class Column {
     private NameValue nameValue;
 
     private static final Logger LOG = Logger.getLogger(Column.class);
+    private boolean isPrimaryKey;
 
     private Column() {
     }
@@ -159,6 +160,10 @@ public class Column {
         return nameValue.value();
     }
 
+    public boolean isPrimaryKey() {
+        return isPrimaryKey;
+    }
+
     public static class ColumnBuilder {
 
         private final Column column;
@@ -208,6 +213,11 @@ public class Column {
 
         public ColumnBuilder withReferencingColumn(final Column referencingColumn) {
             column.setReferencingColumn(referencingColumn);
+            return this;
+        }
+
+        public ColumnBuilder asPrimaryKey(final boolean isPrimaryKey) {
+            column.isPrimaryKey = isPrimaryKey;
             return this;
         }
     }

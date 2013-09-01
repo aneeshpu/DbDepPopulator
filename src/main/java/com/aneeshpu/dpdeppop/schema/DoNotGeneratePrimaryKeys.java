@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy implements ColumnCreationStrategy {
@@ -22,7 +21,6 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
     public Map<String, Column> populateColumns(final Table table, final Map<String, Table> parentTables) throws SQLException {
 
         final Map<String, ColumnTable> foreignKeyTables = foreignKeyTableMap(table.getName(), parentTables);
-        final List<String> primaryKeys = primaryKeys(table);
 
         final ResultSet columnsResultSet = getConnection().getMetaData().getColumns(null, null, table.getName(), null);
 
@@ -43,26 +41,24 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
                 primaryKeyColName = columnTable.getPrimaryKeyColName();
             }
 
-            if(LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Building column " + columnName + " of table " + table.getName());
             }
 
-            columnMap.put(columnName, Column.buildColumn().withName(columnName)
+            columnMap.put(columnName, Column.buildColumn()
+                    .withName(columnName)
                     .withDataType(DataTypeFactory.create(dataType))
                     .withSize(Double.valueOf(columnSize))
                     .withIsNullable(isNullable)
-                    .withIsAutoIncrement(primaryKeys.contains(columnName) ? YesNo.YES : YesNo.NO)
+                    .withIsAutoIncrement(table.isPrimaryKey(columnName) ? YesNo.YES : YesNo.NO)
                     .withReferencingTable(referencingTable)
                     .withReferencingColumn(referencingTable == null ? null : referencingTable.getColumn(primaryKeyColName))
-                    .withTable(table)
-                    .create());
+                    .asPrimaryKey(table.isPrimaryKey(columnName))
+                    .withTable(table).create());
         }
 
         return columnMap;
 
     }
 
-    private List<String> primaryKeys(final Table table) throws SQLException {
-        return table.getPrimaryKeys();
-    }
 }

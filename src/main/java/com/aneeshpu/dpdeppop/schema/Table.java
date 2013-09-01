@@ -194,6 +194,7 @@ public class Table {
     private String generateInsertQuery() throws SQLException {
         final Set<Map.Entry<String, Column>> entrySet = columns.entrySet();
 
+        //TODO:create a method for generating a formatted name
         final StringBuilder fullQuery = new StringBuilder(String.format("insert into \"%s\" ", name));
         StringBuilder columnNamesPartOfQuery = new StringBuilder("(");
         final StringBuilder valuesPartOfQuery = new StringBuilder("(");
@@ -207,6 +208,7 @@ public class Table {
 
             final NameValue nameValue = column.nameValue(this.preassignedValues);
 
+            //TODO:Push the formattedName and formattedValue method into Column
             columnNamesPartOfQuery.append(nameValue.formattedName());
             valuesPartOfQuery.append(nameValue.formattedValue());
         }
@@ -243,13 +245,64 @@ public class Table {
 
     }
 
-    public void delete() {
+    public void delete() throws SQLException {
+        deleteSelf();
+        deleteParents();
 /*
         for (Map.Entry<String, Table> parentTablesEntrySet : parentTables.entrySet()) {
             final Table parentTable = parentTablesEntrySet.getValue();
-            parentTable.delete();
+            parentTable.deleteSelf();
         }
 */
+
+    }
+
+    private void deleteParents() throws SQLException {
+        final ListIterator<Map.Entry<String, Table>> entryListIterator = new ArrayList<Map.Entry<String, Table>>(parentTables.entrySet()).listIterator(parentTables.size());
+        while (entryListIterator.hasPrevious()) {
+            final Map.Entry<String, Table> parentTableEntrySet = entryListIterator.previous();
+            parentTableEntrySet.getValue().deleteSelf();
+        }
+    }
+
+    private void deleteSelf() throws SQLException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("deleting record from " + this);
+        }
+        final Column primaryKeyColumn = getPrimaryKeyColumn();
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("deleting record id " + primaryKeyColumn.value() + " from table " + this);
+        }
+
+        //TODO:push formattedName and formattedValue into Column
+        final NameValue nameValue = primaryKeyColumn.nameValue(this.preassignedValues);
+        final String deleteQuery = String.format("delete from \"%s\" where %s=%s", name, nameValue.formattedNameWithoutTrailingComma(), nameValue.formattedValueWithoutTrailingComma());
+
+        if (LOG.isInfoEnabled()) {
+            LOG.info("delete query: " + deleteQuery);
+        }
+
+        final Statement deleteStatement = connection.createStatement();
+        final int noOfRowsDeleted = deleteStatement.executeUpdate(deleteQuery);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("no of rows deleted from table " + this + " = " + noOfRowsDeleted);
+        }
+        if (noOfRowsDeleted <= 0) {
+            final String message = "could not delete " + this;
+            LOG.error(message);
+            throw new DbPopulatorException(message);
+        }
+    }
+
+    private Column getPrimaryKeyColumn() {
+        for (Map.Entry<String, Column> stringColumnEntry : columns.entrySet()) {
+            final Column column = stringColumnEntry.getValue();
+            if (column.isPrimaryKey()) return column;
+        }
+
+        throw new NoPrimaryKeyFoundException();
 
     }
 

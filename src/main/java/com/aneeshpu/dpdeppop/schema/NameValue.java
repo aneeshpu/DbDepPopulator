@@ -18,8 +18,7 @@ class NameValue {
         final NameValue other = (NameValue) o;
 
         if (columnName != null ? !columnName.equals(other.columnName) : other.columnName != null) return false;
-        if (columnValue != null ? !columnValue.equals(other.columnValue) : other.columnValue != null)
-            return false;
+        if (columnValue != null ? !columnValue.equals(other.columnValue) : other.columnValue != null) return false;
 
         return true;
     }
@@ -49,10 +48,20 @@ class NameValue {
     }
 
     public String formattedValue() {
-        return String.format("%s,",columnValue);
+        return String.format("%s,", columnValue);
+    }
+
+    public String formattedValueWithoutTrailingComma() {
+        final String formattedValue = formattedValue();
+        return formattedValue.substring(0, formattedValue.length() - 1);
     }
 
     public String formattedName() {
         return String.format("\"%s\",", columnName);
+    }
+
+    public String formattedNameWithoutTrailingComma() {
+        final String formattedName = formattedName();
+        return formattedName.substring(0, formattedName.length() - 1);
     }
 }

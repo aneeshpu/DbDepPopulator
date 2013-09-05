@@ -32,7 +32,7 @@ public class Table {
         this.columnCreationStrategy = columnCreationStrategy;
     }
 
-    public Table initialize(final Map<String, Table> parentTables) throws SQLException {
+    private Table initialize(final Map<String, Table> parentTables) throws SQLException {
 
         try {
             this.parentTables = populateParents(parentTables);
@@ -91,7 +91,7 @@ public class Table {
         return preassignedCols.containsKey(foreignKeyColumnName);
     }
 
-    public Map<String, Table> parents() {
+    private Map<String, Table> parents() {
         return parentTables;
     }
 
@@ -122,6 +122,8 @@ public class Table {
     }
 
     public Map<String, Table> populate(final boolean onlyPopulateParentTables) throws SQLException {
+
+        initialize(new LinkedHashMap<String, Table>());
 
         final Map<String, Table> tables = new HashMap<String, Table>();
         insertDefaultValuesIntoParentTables(tables);

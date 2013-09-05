@@ -1,6 +1,5 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,7 +7,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.aneeshpu.dpdeppop.schema.Matchers.*;
 import static junit.framework.Assert.assertNotNull;
@@ -19,30 +21,12 @@ import static org.junit.Assert.assertTrue;
 
 public class TableTest {
 
-    private static final Logger LOG = Logger.getLogger(TableTest.class);
     private final Connection connection = new ConnectionFactory().invoke();
     private Table paymentTable;
 
     @Before
     public void setup() throws SQLException {
         paymentTable = new Table("payment", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection));
-//        paymentTable.initialize(new LinkedHashMap<String, Table>());
-    }
-
-//    @Test
-    public void gets_initialized_with_parents() throws SQLException {
-
-//        final Map<String, Table> parents = paymentTable.parents();
-
-//        assertNotNull(parents.get("invoice"));
-//        assertNotNull(parents.get("payment_status"));
-    }
-
-    @Test
-    public void parents_are_initialized_with_their_parents() throws SQLException {
-
-//        final Table invoiceTable = get(paymentTable.parents(), new Table("invoice", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection)));
-//        assertNotNull(invoiceTable.parents().get("account"));
     }
 
     @Test
@@ -58,10 +42,6 @@ public class TableTest {
         assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new Table("invoice", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection))).withName("id").create())));
     }
 
-    private Table get(final Map<String, Table> parents, final Table table) {
-        return parents.get(table.toString());
-    }
-
     @Test
     public void creates_a_string_representation_of_table() {
 
@@ -73,7 +53,6 @@ public class TableTest {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final Table accountTable = new Table("account", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-//        accountTable.initialize(new LinkedHashMap<String, Table>());
 
         final Map<String, Table> tables = accountTable.populate(false);
         final Table generatedAccountTable = tables.get("account");
@@ -92,7 +71,6 @@ public class TableTest {
         preassignedValues.put("payment", values);
 
         Table paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-//        paymentTable.initialize(new LinkedHashMap<String, Table>());
 
         final boolean onlyPopulateParentTables = false;
         final Map<String, Table> generatedTables = paymentTable.populate(onlyPopulateParentTables);
@@ -119,7 +97,6 @@ public class TableTest {
         preassignedValues.put("payment", values);
 
         Table paymentTable = new Table("payment", connection, preassignedValues, new DoNotGeneratePrimaryKeys(connection));
-//        paymentTable.initialize(new LinkedHashMap<String, Table>());
 
         final boolean onlyPopulateParentTables = false;
         final Map<String, Table> generatedTables = paymentTable.populate(onlyPopulateParentTables);
@@ -147,7 +124,6 @@ public class TableTest {
         preassignedValues.put("payment", values);
 
         Table paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-//        paymentTable.initialize(new LinkedHashMap<String, Table>());
 
         final boolean onlyPopulateParentTables = true;
         final Map<String, Table> populatedTables = paymentTable.populate(onlyPopulateParentTables);
@@ -168,7 +144,6 @@ public class TableTest {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final Table refundTable = new Table("refund", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-//        refundTable.initialize(new LinkedHashMap<String, Table>());
         final Map<String, Table> populatedTables = refundTable.populate(false);
 
         final Table populatedRefundTable = populatedTables.get("refund");
@@ -189,7 +164,6 @@ public class TableTest {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final Table refundTable = new Table("refund", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-//        refundTable.initialize(new LinkedHashMap<String, Table>());
         final Map<String, Table> populatedTables = refundTable.populate(false);
 
         refundTable.delete();
@@ -216,7 +190,6 @@ public class TableTest {
     public void primary_keys_are_marked() throws SQLException {
 
         final Table accountTable = new Table("account", connection, Collections.<String, Map<String, Object>>emptyMap(), new DoNotGeneratePrimaryKeys(connection));
-//        accountTable.initialize(new LinkedHashMap<String, Table>());
         final Map<String, Table> populatedTables = accountTable.populate(false);
 
         assertTrue(populatedTables.get("account").getColumn("id").isPrimaryKey());

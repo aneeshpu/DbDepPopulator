@@ -26,7 +26,11 @@ public class TableTest {
 
     @Before
     public void setup() throws SQLException {
-        paymentTable = new Table("payment", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection));
+        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String,Map<String,Object>>();
+        final Map<String, Object> columnValues = new HashMap<String, Object>();
+        columnValues.put("status", "2");
+        preassignedValues.put("payment", columnValues);
+        paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
     }
 
     @Test
@@ -143,6 +147,9 @@ public class TableTest {
     public void keeps_track_of_ancestry() throws SQLException {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Map<String, Object> columnValues = new HashMap<String, Object>();
+        columnValues.put("status", "2");
+        preassignedValues.put("payment", columnValues);
         final Table refundTable = new Table("refund", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
         final Map<String, Table> populatedTables = refundTable.populate(false);
 
@@ -163,7 +170,10 @@ public class TableTest {
     public void deletes_generated_records() throws SQLException {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final Table refundTable = new Table("refund", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
+        final Map<String, Object> columnValues = new HashMap<String, Object>();
+        columnValues.put("status","2");
+        preassignedValues.put("payment", columnValues);
+        final Table refundTable = new Table("refund", connection, preassignedValues, new DoNotGeneratePrimaryKeys(connection));
         final Map<String, Table> populatedTables = refundTable.populate(false);
 
         refundTable.delete();

@@ -116,12 +116,48 @@ public class Matchers {
         return new BaseMatcher<String>() {
             @Override
             public boolean matches(final Object o) {
-                if (!(o instanceof String))
-                    return false;
+                if (!(o instanceof String)) return false;
 
-                String possibleDatePattern = (String)o;
+                String possibleDatePattern = (String) o;
                 final Pattern dashSeparatedDate = Pattern.compile("'?\\d+-\\d+-\\d+'?");
                 return dashSeparatedDate.matcher(possibleDatePattern).matches();
+            }
+
+            @Override
+            public void describeTo(final Description description) {
+            }
+        };
+    }
+
+    public static Matcher<Object> lessThanOrEqualTo(final int maxValue) {
+        return new BaseMatcher<Object>() {
+            @Override
+            public boolean matches(final Object o) {
+                if (!(o instanceof Integer)) {
+                    return false;
+                }
+
+                final Integer valueToBeCompared = (Integer) o;
+                return valueToBeCompared <= maxValue;
+            }
+
+            @Override
+            public void describeTo(final Description description) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        };
+    }
+
+    public static Matcher<Object> greaterThan(final int minValue) {
+        return new BaseMatcher<Object>() {
+            @Override
+            public boolean matches(final Object o) {
+                if(!(o instanceof Integer)){
+                    return false;
+                }
+
+                final Integer valueToBeCompared = (Integer) o;
+                return valueToBeCompared > minValue;
             }
 
             @Override

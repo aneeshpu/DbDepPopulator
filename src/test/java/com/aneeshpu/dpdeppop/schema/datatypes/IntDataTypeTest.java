@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static com.aneeshpu.dpdeppop.schema.Matchers.aNumber;
+import static com.aneeshpu.dpdeppop.schema.Matchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -18,10 +18,23 @@ public class IntDataTypeTest {
     private Connection connection = new ConnectionFactory().invoke();
 
     @Test
-    public void generates_an_int_value() {
+    public void generated_value_is_less_than_7() {
 
         final IntDataType anInt = new IntDataType("int");
-        assertNotNull(anInt.generateDefaultValue());
+        final Integer generatedInt = anInt.generateDefaultValue();
+        assertNotNull(generatedInt);
+        System.out.println(generatedInt);
+        assertThat(generatedInt, is(lessThanOrEqualTo(IntDataType.MAX_VALUE)));
+    }
+
+    @Test
+    public void generated_value_is_greaer_than_0() {
+
+        final IntDataType anInt = new IntDataType("int");
+        final Integer generatedInt = anInt.generateDefaultValue();
+        assertNotNull(generatedInt);
+        System.out.println(generatedInt);
+        assertThat(generatedInt, is(greaterThan(0)));
     }
 
     @Test
@@ -39,5 +52,4 @@ public class IntDataTypeTest {
         final IntDataType anInt = new IntDataType("int");
         assertThat(anInt.getGeneratedValue(generatedKeys, "id"), is(aNumber()));
     }
-
 }

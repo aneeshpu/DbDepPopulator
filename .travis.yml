@@ -1,4 +1,4 @@
 language: java
 before_script:
- #- psql -c 'create database datapopulator;' -U postgres
- ls;whoami;cd ..;ls -l;pwd;cd ..;
+ - psql -c "create database datapopulator;create role datapopulator with login password 'letmein'" -U postgres
+ #ls;whoami;cd ..;ls -l;pwd;cd ..;ls -l;

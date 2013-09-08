@@ -11,7 +11,7 @@ public class ConnectionFactory {
 
     public Connection invoke() {
         try {
-            return DriverManager.getConnection("jdbc:postgresql://localhost/datadeppop", "datapopulator", "letmein");
+            return DriverManager.getConnection("jdbc:postgresql://localhost/datapopulator_test", "datapopulator", "letmein");
         } catch (SQLException e) {
             final String url = "jdbc:postgresql://localhost/datadeppop";
             final String username = "datapopulator";

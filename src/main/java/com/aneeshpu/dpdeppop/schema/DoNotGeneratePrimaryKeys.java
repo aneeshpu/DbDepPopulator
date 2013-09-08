@@ -9,12 +9,13 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy implements ColumnCreationStrategy {
+public class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
 
     public static final Logger LOG = Logger.getLogger(DoNotGeneratePrimaryKeys.class);
+    private final Connection connection;
 
     public DoNotGeneratePrimaryKeys(final Connection connection) {
-        super(connection);
+        this.connection = connection;
     }
 
     @Override
@@ -22,7 +23,7 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
 
         final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
 
-        final ResultSet columnsResultSet = getConnection().getMetaData().getColumns(null, null, record.getName(), null);
+        final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.getName(), null);
 
         final Map<String, Column> columnMap = new HashMap<String, Column>();
 

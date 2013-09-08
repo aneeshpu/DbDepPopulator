@@ -8,10 +8,12 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AutoIncrementBasedCreation extends AbstractColumnCreationStrategy implements ColumnCreationStrategy {
+public class AutoIncrementBasedCreation implements ColumnCreationStrategy {
+
+    private final Connection connection;
 
     public AutoIncrementBasedCreation(final Connection connection) {
-        super(connection);
+        this.connection = connection;
     }
 
     @Override
@@ -19,16 +21,16 @@ public class AutoIncrementBasedCreation extends AbstractColumnCreationStrategy i
 
         final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
 
-        final ResultSet columnsResultset = getConnection().getMetaData().getColumns(null, null, record.getName(), null);
+        final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.getName(), null);
 
         final HashMap<String, Column> stringColumnHashMap = new HashMap<String, Column>();
 
-        while (columnsResultset.next()) {
-            final String columnName = columnsResultset.getString(Column.COLUMN_NAME);
-            final String dataType = columnsResultset.getString(Column.TYPE_NAME);
-            final String columnSize = columnsResultset.getString(Column.COLUMN_SIZE);
-            final String isNullable = columnsResultset.getString(Column.IS_NULLABLE);
-            final String isAutoIncrement = columnsResultset.getString(Column.IS_AUTOINCREMENT);
+        while (columnsResultSet.next()) {
+            final String columnName = columnsResultSet.getString(Column.COLUMN_NAME);
+            final String dataType = columnsResultSet.getString(Column.TYPE_NAME);
+            final String columnSize = columnsResultSet.getString(Column.COLUMN_SIZE);
+            final String isNullable = columnsResultSet.getString(Column.IS_NULLABLE);
+            final String isAutoIncrement = columnsResultSet.getString(Column.IS_AUTOINCREMENT);
 
             final ColumnTable columnTable = foreignKeyTables.get(columnName);
             Record referencingRecord = null;

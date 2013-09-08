@@ -60,5 +60,4 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
         return columnMap;
 
     }
-
 }

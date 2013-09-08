@@ -1,1 +1,3 @@
 language: java
+before_script:
+	- psql -c 'create database datapopulator;' -U postgres

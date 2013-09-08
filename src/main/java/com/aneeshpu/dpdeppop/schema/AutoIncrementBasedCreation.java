@@ -15,11 +15,11 @@ public class AutoIncrementBasedCreation extends AbstractColumnCreationStrategy i
     }
 
     @Override
-    public Map<String, Column> populateColumns(final Table table, final Map<String, Table> parentTables) throws SQLException {
+    public Map<String, Column> populateColumns(final Record record, final Map<String, Record> parentTables) throws SQLException {
 
-        final Map<String, ColumnTable> foreignKeyTables = foreignKeyTableMap(table.getName(), parentTables);
+        final Map<String, ColumnTable> foreignKeyTables = foreignKeyTableMap(record.getName(), parentTables);
 
-        final ResultSet columnsResultset = getConnection().getMetaData().getColumns(null, null, table.getName(), null);
+        final ResultSet columnsResultset = getConnection().getMetaData().getColumns(null, null, record.getName(), null);
 
         final HashMap<String, Column> stringColumnHashMap = new HashMap<String, Column>();
 
@@ -31,11 +31,11 @@ public class AutoIncrementBasedCreation extends AbstractColumnCreationStrategy i
             final String isAutoIncrement = columnsResultset.getString(Column.IS_AUTOINCREMENT);
 
             final ColumnTable columnTable = foreignKeyTables.get(columnName);
-            Table referencingTable = null;
+            Record referencingRecord = null;
             String primaryKeyColName = null;
 
             if (columnTable != null) {
-                referencingTable = columnTable.getPrimaryTable();
+                referencingRecord = columnTable.getPrimaryRecord();
                 primaryKeyColName = columnTable.getPrimaryKeyColName();
             }
 
@@ -44,10 +44,10 @@ public class AutoIncrementBasedCreation extends AbstractColumnCreationStrategy i
                     .withSize(Double.valueOf(columnSize))
                     .withIsNullable(isNullable)
                     .withIsAutoIncrement(isAutoIncrement)
-                    .withReferencingTable(referencingTable)
-                    .withReferencingColumn(referencingTable == null ? null : referencingTable.getColumn(primaryKeyColName))
-                    .withTable(table)
-                    .asPrimaryKey(table.isPrimaryKey(columnName))
+                    .withReferencingTable(referencingRecord)
+                    .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
+                    .withTable(record)
+                    .asPrimaryKey(record.isPrimaryKey(columnName))
                     .create());
         }
 

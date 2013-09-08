@@ -19,10 +19,10 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class TableTest {
+public class RecordTest {
 
     private final Connection connection = new ConnectionFactory().invoke();
-    private Table paymentTable;
+    private Record paymentRecord;
 
     @Before
     public void setup() throws SQLException {
@@ -30,39 +30,39 @@ public class TableTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
+        paymentRecord = new Record("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
     }
 
     @Test
     public void populates_columns() throws SQLException {
-        paymentTable.populate(false);
-        assertNotNull(paymentTable.columns().get("id"));
+        paymentRecord.populate(false);
+        assertNotNull(paymentRecord.columns().get("id"));
     }
 
     @Test
     public void foreign_keys_are_populated_with_their_referencing_tables() throws SQLException {
-        paymentTable.populate(false);
-        final Column invoiceId = paymentTable.columns().get("invoice_id");
-        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new Table("invoice", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection))).withName("id").create())));
+        paymentRecord.populate(false);
+        final Column invoiceId = paymentRecord.columns().get("invoice_id");
+        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new Record("invoice", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection))).withName("id").create())));
     }
 
     @Test
     public void creates_a_string_representation_of_table() {
 
-        assertThat(new Table("payment", null, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection)).toString(), is(equalTo("payment")));
+        assertThat(new Record("payment", null, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection)).toString(), is(equalTo("payment")));
     }
 
     @Test
     public void generates_an_insert_query() throws SQLException {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final Table accountTable = new Table("account", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
+        final Record accountRecord = new Record("account", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
 
-        final Map<String, Table> tables = accountTable.populate(false);
-        final Table generatedAccountTable = tables.get("account");
-        System.out.println(generatedAccountTable);
+        final Map<String, Record> tables = accountRecord.populate(false);
+        final Record generatedAccountRecord = tables.get("account");
+        System.out.println(generatedAccountRecord);
 
-        assertThat(generatedAccountTable.getColumn("id").value(), is(aNumber()));
+        assertThat(generatedAccountRecord.getColumn("id").value(), is(aNumber()));
     }
 
     @Test
@@ -74,19 +74,19 @@ public class TableTest {
 
         preassignedValues.put("payment", values);
 
-        Table paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
+        Record paymentRecord = new Record("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
 
         final boolean onlyPopulateParentTables = false;
-        final Map<String, Table> generatedTables = paymentTable.populate(onlyPopulateParentTables);
+        final Map<String, Record> generatedTables = paymentRecord.populate(onlyPopulateParentTables);
 
-        final Table account = generatedTables.get("account");
+        final Record account = generatedTables.get("account");
         assertThat(account.getColumn("name").value(), is(aString()));
 
-        final Table invoice = generatedTables.get("invoice");
+        final Record invoice = generatedTables.get("invoice");
         assertThat(invoice.getColumn("amount").value(), is(aNumber()));
         assertThat(invoice.getColumn("account_id").value(), is(aNumber()));
 
-        final Table payment = generatedTables.get("payment");
+        final Record payment = generatedTables.get("payment");
         assertThat(payment.getColumn("amount").value(), is(aNumber()));
         assertThat(Integer.parseInt(String.valueOf(payment.getColumn("status").value())), is(equalTo(2)));
         assertThat(payment.getColumn("invoice_id").value(), is(aNumber()));
@@ -100,19 +100,19 @@ public class TableTest {
 
         preassignedValues.put("payment", values);
 
-        Table paymentTable = new Table("payment", connection, preassignedValues, new DoNotGeneratePrimaryKeys(connection));
+        Record paymentRecord = new Record("payment", connection, preassignedValues, new DoNotGeneratePrimaryKeys(connection));
 
         final boolean onlyPopulateParentTables = false;
-        final Map<String, Table> generatedTables = paymentTable.populate(onlyPopulateParentTables);
+        final Map<String, Record> generatedTables = paymentRecord.populate(onlyPopulateParentTables);
 
-        final Table account = generatedTables.get("account");
+        final Record account = generatedTables.get("account");
         assertThat(account.getColumn("name").value(), is(aString()));
 
-        final Table invoice = generatedTables.get("invoice");
+        final Record invoice = generatedTables.get("invoice");
         assertThat(invoice.getColumn("amount").value(), is(aNumber()));
         assertThat(invoice.getColumn("account_id").value(), is(aNumber()));
 
-        final Table payment = generatedTables.get("payment");
+        final Record payment = generatedTables.get("payment");
         assertThat(payment.getColumn("amount").value(), is(aNumber()));
         assertThat(Integer.parseInt(String.valueOf(payment.getColumn("status").value())), is(equalTo(2)));
         assertThat(payment.getColumn("invoice_id").value(), is(aNumber()));
@@ -127,10 +127,10 @@ public class TableTest {
 
         preassignedValues.put("payment", values);
 
-        Table paymentTable = new Table("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
+        Record paymentRecord = new Record("payment", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
 
         final boolean onlyPopulateParentTables = true;
-        final Map<String, Table> populatedTables = paymentTable.populate(onlyPopulateParentTables);
+        final Map<String, Record> populatedTables = paymentRecord.populate(onlyPopulateParentTables);
 
         assertThat(populatedTables.get("account").getColumn("name").value(), is(aString()));
         assertThat(populatedTables.get("invoice").getColumn("amount").value(), is(aNumber()));
@@ -139,7 +139,7 @@ public class TableTest {
 
     @Test
     public void identifies_its_own_primary_keys() throws SQLException {
-        final List<String> primaryKeys = paymentTable.getPrimaryKeys();
+        final List<String> primaryKeys = paymentRecord.getPrimaryKeys();
         assertThat(primaryKeys, contains("id"));
     }
 
@@ -150,14 +150,14 @@ public class TableTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        final Table refundTable = new Table("refund", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
-        final Map<String, Table> populatedTables = refundTable.populate(false);
+        final Record refundRecord = new Record("refund", connection, preassignedValues, new AutoIncrementBasedCreation(connection));
+        final Map<String, Record> populatedTables = refundRecord.populate(false);
 
-        final Table populatedRefundTable = populatedTables.get("refund");
-        final Column accountAssociatedWithRefund = populatedRefundTable.getColumn("account_id");
+        final Record populatedRefundRecord = populatedTables.get("refund");
+        final Column accountAssociatedWithRefund = populatedRefundRecord.getColumn("account_id");
 
-        final Table populatedInvoiceTable = populatedTables.get("invoice");
-        final Column accountAssociatedWithInvoice = populatedInvoiceTable.getColumn("account_id");
+        final Record populatedInvoiceRecord = populatedTables.get("invoice");
+        final Column accountAssociatedWithInvoice = populatedInvoiceRecord.getColumn("account_id");
 
         System.out.println("Account associated with invoice:" + accountAssociatedWithInvoice.value());
         System.out.println("Account associated with refund:" + accountAssociatedWithRefund.value());
@@ -173,13 +173,13 @@ public class TableTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status","2");
         preassignedValues.put("payment", columnValues);
-        final Table refundTable = new Table("refund", connection, preassignedValues, new DoNotGeneratePrimaryKeys(connection));
-        final Map<String, Table> populatedTables = refundTable.populate(false);
+        final Record refundRecord = new Record("refund", connection, preassignedValues, new DoNotGeneratePrimaryKeys(connection));
+        final Map<String, Record> populatedTables = refundRecord.populate(false);
 
-        refundTable.delete();
+        refundRecord.delete();
 
         final Statement statement = connection.createStatement();
-        for (Map.Entry<String, Table> entrySet : populatedTables.entrySet()) {
+        for (Map.Entry<String, Record> entrySet : populatedTables.entrySet()) {
             final String query = String.format("select count(*) from %s where id=%s", entrySet.getKey(), entrySet.getValue().getColumn("id").value());
             System.out.println("query:" + query);
             statement.execute(query);
@@ -199,8 +199,8 @@ public class TableTest {
     @Test
     public void primary_keys_are_marked() throws SQLException {
 
-        final Table accountTable = new Table("account", connection, Collections.<String, Map<String, Object>>emptyMap(), new DoNotGeneratePrimaryKeys(connection));
-        final Map<String, Table> populatedTables = accountTable.populate(false);
+        final Record accountRecord = new Record("account", connection, Collections.<String, Map<String, Object>>emptyMap(), new DoNotGeneratePrimaryKeys(connection));
+        final Map<String, Record> populatedTables = accountRecord.populate(false);
 
         assertTrue(populatedTables.get("account").getColumn("id").isPrimaryKey());
     }

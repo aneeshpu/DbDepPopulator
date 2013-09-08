@@ -18,11 +18,11 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
     }
 
     @Override
-    public Map<String, Column> populateColumns(final Table table, final Map<String, Table> parentTables) throws SQLException {
+    public Map<String, Column> populateColumns(final Record record, final Map<String, Record> parentTables) throws SQLException {
 
-        final Map<String, ColumnTable> foreignKeyTables = foreignKeyTableMap(table.getName(), parentTables);
+        final Map<String, ColumnTable> foreignKeyTables = foreignKeyTableMap(record.getName(), parentTables);
 
-        final ResultSet columnsResultSet = getConnection().getMetaData().getColumns(null, null, table.getName(), null);
+        final ResultSet columnsResultSet = getConnection().getMetaData().getColumns(null, null, record.getName(), null);
 
         final Map<String, Column> columnMap = new HashMap<String, Column>();
 
@@ -33,16 +33,16 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
             final String isNullable = columnsResultSet.getString(Column.IS_NULLABLE);
 
             final ColumnTable columnTable = foreignKeyTables.get(columnName);
-            Table referencingTable = null;
+            Record referencingRecord = null;
             String primaryKeyColName = null;
 
             if (columnTable != null) {
-                referencingTable = columnTable.getPrimaryTable();
+                referencingRecord = columnTable.getPrimaryRecord();
                 primaryKeyColName = columnTable.getPrimaryKeyColName();
             }
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Building column " + columnName + " of table " + table.getName());
+                LOG.debug("Building column " + columnName + " of record " + record.getName());
             }
 
             columnMap.put(columnName, Column.buildColumn()
@@ -50,11 +50,11 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
                     .withDataType(DataTypeFactory.create(dataType))
                     .withSize(Double.valueOf(columnSize))
                     .withIsNullable(isNullable)
-                    .withIsAutoIncrement(table.isPrimaryKey(columnName) ? YesNo.YES : YesNo.NO)
-                    .withReferencingTable(referencingTable)
-                    .withReferencingColumn(referencingTable == null ? null : referencingTable.getColumn(primaryKeyColName))
-                    .asPrimaryKey(table.isPrimaryKey(columnName))
-                    .withTable(table).create());
+                    .withIsAutoIncrement(record.isPrimaryKey(columnName) ? YesNo.YES : YesNo.NO)
+                    .withReferencingTable(referencingRecord)
+                    .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
+                    .asPrimaryKey(record.isPrimaryKey(columnName))
+                    .withTable(record).create());
         }
 
         return columnMap;

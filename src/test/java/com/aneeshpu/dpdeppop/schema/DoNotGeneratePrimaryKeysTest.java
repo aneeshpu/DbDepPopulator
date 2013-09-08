@@ -5,7 +5,6 @@ import org.junit.Test;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
@@ -22,11 +21,11 @@ public class DoNotGeneratePrimaryKeysTest {
 
         final DoNotGeneratePrimaryKeys doNotGeneratePrimaryKeys = new DoNotGeneratePrimaryKeys(CONNECTION);
 
-        final Table accountTable = new Table("account", CONNECTION, Collections.<String, Map<String, Object>>emptyMap(), doNotGeneratePrimaryKeys);
-        final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountTable, Collections.<String, Table>emptyMap());
+        final Record accountRecord = new Record("account", CONNECTION, Collections.<String, Map<String, Object>>emptyMap(), doNotGeneratePrimaryKeys);
+        final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord, Collections.<String, Record>emptyMap());
 
         final Column id = populatedColumns.get("id");
-        assertThat(id, is(equalTo(Column.buildColumn().withTable(accountTable).withName("id").create())));
+        assertThat(id, is(equalTo(Column.buildColumn().withTable(accountRecord).withName("id").create())));
         assertThat(id.isAutoIncrement(), is(true));
     }
 }

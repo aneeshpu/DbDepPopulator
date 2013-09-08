@@ -14,10 +14,10 @@ public class Column {
     public static final String IS_NULLABLE = "IS_NULLABLE";
     public static final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
     private String name;
-    private Table table;
+    private Record record;
     private DataType dataType;
     private double columnSize;
-    private Table referencingTable;
+    private Record referencingRecord;
     private Column referencingColumn;
     private YesNo autoIncrement = new YesNo("NO");
 
@@ -43,7 +43,7 @@ public class Column {
         final Column column = (Column) o;
 
         if (name != null ? !name.equals(column.name) : column.name != null) return false;
-        if (table != null ? !table.equals(column.table) : column.table != null) return false;
+        if (record != null ? !record.equals(column.record) : column.record != null) return false;
 
         return true;
     }
@@ -51,7 +51,7 @@ public class Column {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (table != null ? table.hashCode() : 0);
+        result = 31 * result + (record != null ? record.hashCode() : 0);
         return result;
     }
 
@@ -85,20 +85,20 @@ public class Column {
         this.autoIncrement = yesNo;
     }
 
-    private void setTable(final Table table) {
-        this.table = table;
+    private void setRecord(final Record record) {
+        this.record = record;
     }
 
-    public Table getTable() {
-        return table;
+    public Record getRecord() {
+        return record;
     }
 
-    public void setReferencingTable(final Table referencingTable) {
-        this.referencingTable = referencingTable;
+    public void setReferencingRecord(final Record referencingRecord) {
+        this.referencingRecord = referencingRecord;
     }
 
-    public Table getReferencingTable() {
-        return referencingTable;
+    public Record getReferencingRecord() {
+        return referencingRecord;
     }
 
     public void setReferencingColumn(final Column referencingColumn) {
@@ -126,20 +126,20 @@ public class Column {
     }
 
     private NameValue getPreassignedNameValue(final Map<String, Map<String, Object>> preassignedValues) {
-        final Object preassignedValue = preassignedValues.get(table.name()).get(name);
+        final Object preassignedValue = preassignedValues.get(record.name()).get(name);
 
         return new NameValue(name, preassignedValue);
     }
 
     private boolean isPreAssigned(final Map<String, Map<String, Object>> preassignedValues) {
-        if (!preassignedValues.containsKey(table.name())) {
+        if (!preassignedValues.containsKey(record.name())) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("No preassigned values for " + table.name());
+                LOG.debug("No preassigned values for " + record.name());
             }
             return false;
         }
 
-        return preassignedValues.get(table.name()).containsKey(name);
+        return preassignedValues.get(record.name()).containsKey(name);
     }
 
     private boolean isForeignKey() {
@@ -201,13 +201,13 @@ public class Column {
             return this;
         }
 
-        public ColumnBuilder withTable(final Table table) {
-            column.setTable(table);
+        public ColumnBuilder withTable(final Record record) {
+            column.setRecord(record);
             return this;
         }
 
-        public ColumnBuilder withReferencingTable(final Table referencingTable) {
-            column.setReferencingTable(referencingTable);
+        public ColumnBuilder withReferencingTable(final Record referencingRecord) {
+            column.setReferencingRecord(referencingRecord);
             return this;
         }
 

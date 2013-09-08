@@ -21,14 +21,14 @@ public class ColumnTest {
     private Connection connection = new ConnectionFactory().invoke();
 
     @Mock
-    private Table table;
+    private Record record;
 
 
     @Test
     public void considers_two_columns_from_the_same_table_with_same_names_are_equal(){
 
-        final Column idColumn = Column.buildColumn().withName("id").withTable(new Table("payment", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection))).create();
-        final Column anotherIdColumn = Column.buildColumn().withName("id").withTable(new Table("payment", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection))).create();
+        final Column idColumn = Column.buildColumn().withName("id").withTable(new Record("payment", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection))).create();
+        final Column anotherIdColumn = Column.buildColumn().withName("id").withTable(new Record("payment", connection, new HashMap<String, Map<String, Object>>(), new AutoIncrementBasedCreation(connection))).create();
 
         assertThat(idColumn, is(equalTo(anotherIdColumn)));
     }
@@ -47,7 +47,7 @@ public class ColumnTest {
         final Column amount = Column.buildColumn()
                 .withName("amount")
                 .withDataType(dataType)
-                .withTable(table)
+                .withTable(record)
                 .create();
         final NameValue nameValue = amount.nameValue(new java.util.HashMap<String, java.util.Map<String, Object>>());
 
@@ -72,7 +72,7 @@ public class ColumnTest {
                                     .withName("invoice_id")
                                     .withReferencingColumn(idColumnInInvoiceTable)
                                     .withDataType(dataType)
-                                    .withTable(table)
+                                    .withTable(record)
                                     .create();
         assertThat(invoiceIdColumn.nameValue(preassignedValues), is(equalTo(new NameValue("invoice_id", primaryKeyInInvoiceTable))));
 
@@ -89,7 +89,7 @@ public class ColumnTest {
         final Column amount = Column.buildColumn()
                 .withName("amount")
                 .withDataType(dataType)
-                .withTable(table)
+                .withTable(record)
                 .create();
         final NameValue nameValue = amount.nameValue(new java.util.HashMap<String, java.util.Map<String, Object>>());
 
@@ -104,10 +104,10 @@ public class ColumnTest {
         final DataType<Float> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn(10f);
 
-        final Table table = mock(Table.class);
-        when(table.name()).thenReturn("payment");
+        final Record record = mock(Record.class);
+        when(record.name()).thenReturn("payment");
 
-        final Column amount = Column.buildColumn().withTable(table).withName("status").withDataType(dataType).create();
+        final Column amount = Column.buildColumn().withTable(record).withName("status").withDataType(dataType).create();
         final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("status", 2);
@@ -118,7 +118,7 @@ public class ColumnTest {
 
         assertThat(nameValue, is(equalTo(new NameValue("status", 2))));
 
-        verify(table, atLeastOnce()).name();
+        verify(record, atLeastOnce()).name();
         verify(dataType, never()).generateDefaultValue();
 
     }

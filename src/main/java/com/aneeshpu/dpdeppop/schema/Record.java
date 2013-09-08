@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
-public class Table {
-    public static final Logger LOG = Logger.getLogger(Table.class);
+public class Record {
+    public static final Logger LOG = Logger.getLogger(Record.class);
 
     public static final String PRIMARY_KEY_TABLE_NAME = "pktable_name";
     public static final String PRIMARY_KEY_COLUMN_NAME = "pkcolumn_name";
@@ -19,20 +19,20 @@ public class Table {
     private final String name;
     private final Connection connection;
     private final Map<String, Map<String, Object>> preassignedValues;
-    private Map<String, Table> parentTables;
+    private Map<String, Record> parentTables;
     private final Map<String, Column> columns;
     private final ColumnCreationStrategy columnCreationStrategy;
 
-    public Table(String name, final Connection connection, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy) {
+    public Record(String name, final Connection connection, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy) {
         this.name = name;
         this.connection = connection;
         this.preassignedValues = preassignedValues;
-//        parentTables = new HashMap<String, Table>();
+//        parentTables = new HashMap<String, Record>();
         columns = new HashMap<String, Column>();
         this.columnCreationStrategy = columnCreationStrategy;
     }
 
-    private Table initialize(final Map<String, Table> parentTables) throws SQLException {
+    private Record initialize(final Map<String, Record> parentTables) throws SQLException {
 
         try {
             this.parentTables = populateParents(parentTables);
@@ -56,7 +56,7 @@ public class Table {
         return columns.get(columnName);
     }
 
-    private Map<String, Table> populateParents(final Map<String, Table> parentTables) throws SQLException {
+    private Map<String, Record> populateParents(final Map<String, Record> parentTables) throws SQLException {
         final ResultSet importedKeysResultSet = connection.getMetaData().getImportedKeys(null, null, name);
 
         while (importedKeysResultSet.next()) {
@@ -70,7 +70,7 @@ public class Table {
                 continue;
             }
 
-            parentTables.put(primaryKeyTableName, new Table(primaryKeyTableName, connection, preassignedValues, columnCreationStrategy).initialize(parentTables));
+            parentTables.put(primaryKeyTableName, new Record(primaryKeyTableName, connection, preassignedValues, columnCreationStrategy).initialize(parentTables));
         }
 
         return parentTables;
@@ -91,7 +91,7 @@ public class Table {
         return preassignedCols.containsKey(foreignKeyColumnName);
     }
 
-    private Map<String, Table> parents() {
+    private Map<String, Record> parents() {
         return parentTables;
     }
 
@@ -100,9 +100,9 @@ public class Table {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final Table table = (Table) o;
+        final Record record = (Record) o;
 
-        if (!name.equals(table.name)) return false;
+        if (!name.equals(record.name)) return false;
 
         return true;
     }
@@ -121,11 +121,11 @@ public class Table {
         return columns;
     }
 
-    public Map<String, Table> populate(final boolean onlyPopulateParentTables) throws SQLException {
+    public Map<String, Record> populate(final boolean onlyPopulateParentTables) throws SQLException {
 
-        initialize(new LinkedHashMap<String, Table>());
+        initialize(new LinkedHashMap<String, Record>());
 
-        final Map<String, Table> tables = new HashMap<String, Table>();
+        final Map<String, Record> tables = new HashMap<String, Record>();
         insertDefaultValuesIntoParentTables(tables);
 
         if (onlyPopulateParentTables) {
@@ -141,15 +141,15 @@ public class Table {
         return tables;
     }
 
-    private void insertDefaultValuesIntoParentTables(final Map<String, Table> tables) throws SQLException {
+    private void insertDefaultValuesIntoParentTables(final Map<String, Record> tables) throws SQLException {
 
-        for (Map.Entry<String, Table> entry : parentTables.entrySet()) {
+        for (Map.Entry<String, Record> entry : parentTables.entrySet()) {
 
-            final Table parentTable = entry.getValue();
-//            final Map<String, Table> parentTables = parentTable.populate(false);
-            parentTable.insertDefaultValuesIntoCurrentTable();
-            tables.put(parentTable.name, parentTable);
-//            final Map<String, Table> parentTables = parentTable.populate(false);
+            final Record parentRecord = entry.getValue();
+//            final Map<String, Record> parentTables = parentRecord.populate(false);
+            parentRecord.insertDefaultValuesIntoCurrentTable();
+            tables.put(parentRecord.name, parentRecord);
+//            final Map<String, Record> parentTables = parentRecord.populate(false);
 
             tables.putAll(parentTables);
         }
@@ -239,7 +239,7 @@ public class Table {
 
         final List<String> primaryKeys = new ArrayList<String>();
         while (primaryKeysResultSet.next()) {
-            final String primaryKey = primaryKeysResultSet.getString(Table.COLUMN_NAME);
+            final String primaryKey = primaryKeysResultSet.getString(Record.COLUMN_NAME);
             primaryKeys.add(primaryKey);
         }
 
@@ -251,8 +251,8 @@ public class Table {
         deleteSelf();
         deleteParents();
 /*
-        for (Map.Entry<String, Table> parentTablesEntrySet : parentTables.entrySet()) {
-            final Table parentTable = parentTablesEntrySet.getValue();
+        for (Map.Entry<String, Record> parentTablesEntrySet : parentTables.entrySet()) {
+            final Record parentTable = parentTablesEntrySet.getValue();
             parentTable.deleteSelf();
         }
 */
@@ -260,9 +260,9 @@ public class Table {
     }
 
     private void deleteParents() throws SQLException {
-        final ListIterator<Map.Entry<String, Table>> entryListIterator = new ArrayList<Map.Entry<String, Table>>(parentTables.entrySet()).listIterator(parentTables.size());
+        final ListIterator<Map.Entry<String, Record>> entryListIterator = new ArrayList<Map.Entry<String, Record>>(parentTables.entrySet()).listIterator(parentTables.size());
         while (entryListIterator.hasPrevious()) {
-            final Map.Entry<String, Table> parentTableEntrySet = entryListIterator.previous();
+            final Map.Entry<String, Record> parentTableEntrySet = entryListIterator.previous();
             parentTableEntrySet.getValue().deleteSelf();
         }
     }

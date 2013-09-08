@@ -18,9 +18,9 @@ public class DoNotGeneratePrimaryKeys extends AbstractColumnCreationStrategy imp
     }
 
     @Override
-    public Map<String, Column> populateColumns(final Record record, final Map<String, Record> parentTables) throws SQLException {
+    public Map<String, Column> populateColumns(final Record record) throws SQLException {
 
-        final Map<String, ColumnTable> foreignKeyTables = foreignKeyTableMap(record.getName(), parentTables);
+        final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
 
         final ResultSet columnsResultSet = getConnection().getMetaData().getColumns(null, null, record.getName(), null);
 

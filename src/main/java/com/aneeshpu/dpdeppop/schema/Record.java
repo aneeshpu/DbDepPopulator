@@ -36,7 +36,7 @@ public class Record {
 
         try {
             this.parentTables = populateParents(parentTables);
-            final Map<String, Column> stringColumnHashMap = columnCreationStrategy.populateColumns(this, this.parentTables);
+            final Map<String, Column> stringColumnHashMap = columnCreationStrategy.populateColumns(this);
             columns.putAll(stringColumnHashMap);
 
             return this;
@@ -311,5 +311,26 @@ public class Record {
     public boolean isPrimaryKey(final String columnName) throws SQLException {
         final List<String> primaryKeys = getPrimaryKeys();
         return primaryKeys.contains(columnName);
+    }
+
+    Map<String, ColumnTable> foreignKeyTableMap() throws SQLException {
+
+        final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, getName());
+
+        final Map<String, ColumnTable> foreignKeys = new HashMap<String, ColumnTable>();
+        while (crossReference.next()) {
+
+            final String primaryKeyTableName = crossReference.getString(PRIMARY_KEY_TABLE_NAME);
+            final String primaryKeyColName = crossReference.getString(PRIMARY_KEY_COLUMN_NAME);
+            final String foreignKeyColumnName = crossReference.getString(FOREIGN_KEY_COLUMN_NAME);
+
+
+            final Record primaryRecord = this.parentTables.get(primaryKeyTableName);
+
+            foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColName, primaryRecord));
+        }
+
+
+        return foreignKeys;
     }
 }

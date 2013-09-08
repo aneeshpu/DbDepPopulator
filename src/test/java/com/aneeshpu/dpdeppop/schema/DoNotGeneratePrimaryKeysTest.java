@@ -22,7 +22,7 @@ public class DoNotGeneratePrimaryKeysTest {
         final DoNotGeneratePrimaryKeys doNotGeneratePrimaryKeys = new DoNotGeneratePrimaryKeys(CONNECTION);
 
         final Record accountRecord = new Record("account", CONNECTION, Collections.<String, Map<String, Object>>emptyMap(), doNotGeneratePrimaryKeys);
-        final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord, Collections.<String, Record>emptyMap());
+        final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord);
 
         final Column id = populatedColumns.get("id");
         assertThat(id, is(equalTo(Column.buildColumn().withTable(accountRecord).withName("id").create())));

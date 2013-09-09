@@ -3,11 +3,31 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
 
     <groupId>com.aneeshpu.dbdeppop</groupId>
     <artifactId>DBDependencyPopulator</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>DbDependencyPopulator</name>
+    <description>A library to automatically populate RDBMS tables</description>
+    <url>https://github.com/aneeshpu/DbDepPopulator</url>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
+    <scm>
+        <connection>scm:git:git@github.com:aneeshpu/DbDepPopulator.git</connection>
+        <developerConnection>scm:git:git@github.com:aneeshpu/DbDepPopulator.git</developerConnection>
+        <url>git@github.com:aneeshpu/DbDepPopulator.git</url>
+    </scm>
 
     <dependencies>
 
@@ -89,4 +109,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

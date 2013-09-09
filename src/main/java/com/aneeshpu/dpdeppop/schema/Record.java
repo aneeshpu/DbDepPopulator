@@ -1,6 +1,5 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.query.Query;
 import com.aneeshpu.dpdeppop.schema.query.QueryFactory;
 import org.apache.log4j.Logger;
 
@@ -158,19 +157,11 @@ public class Record {
     }
 
     private String insertDefaultValuesIntoCurrentTable() throws SQLException {
-        final Query insertSQL = queryFactory.generateInsertQuery(columns, this.preassignedValues, this);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("insert query: " + insertSQL);
-        }
-
-        final Statement statement = connection.createStatement();
-        statement.execute(insertSQL.toString());
-
-        final ResultSet generatedKeys = statement.getResultSet();
+        final ResultSet generatedKeys = queryFactory.generateInsertQuery(columns, this.preassignedValues, this).execute();
         setGeneratedValuesOnColumns(generatedKeys, getColumnsWithGeneratedValues());
 
-        return insertSQL.toString();
+        return queryFactory.generateInsertQuery(columns, this.preassignedValues, this).toString();
     }
 
     private void setGeneratedValuesOnColumns(final ResultSet generatedKeys, final Map<String, Column> columnsWithGeneratedValues) throws SQLException {

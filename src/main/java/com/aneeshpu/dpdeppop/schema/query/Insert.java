@@ -5,7 +5,10 @@ import com.aneeshpu.dpdeppop.schema.NameValue;
 import com.aneeshpu.dpdeppop.schema.Record;
 import org.apache.log4j.Logger;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,13 +17,15 @@ class Insert implements Query{
     private final Map<String, Column> columns;
     private final Map<String, Map<String, Object>> preassignedValues;
     private final Record record;
+    private final Connection connection;
 
     public static final Logger LOG = Logger.getLogger(Insert.class);
 
-    public Insert(final Map<String, Column> columns, final Map<String, Map<String, Object>> preassignedValues, final Record record) {
+    public Insert(final Map<String, Column> columns, final Map<String, Map<String, Object>> preassignedValues, final Record record, final Connection connection) {
         this.columns = columns;
         this.preassignedValues = preassignedValues;
         this.record = record;
+        this.connection = connection;
     }
 
     @Override
@@ -66,5 +71,17 @@ class Insert implements Query{
         }
 
         return fullQuery.toString();
+    }
+
+    @Override
+    public ResultSet execute() throws SQLException {
+        if (Record.LOG.isDebugEnabled()) {
+            Record.LOG.debug("insert query: " + this);
+        }
+
+        final Statement statement = connection.createStatement();
+        statement.execute(toString());
+
+        return statement.getResultSet();
     }
 }

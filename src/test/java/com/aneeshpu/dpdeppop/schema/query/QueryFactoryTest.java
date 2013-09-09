@@ -18,13 +18,11 @@ import static junit.framework.TestCase.assertNotNull;
 @RunWith(MockitoJUnitRunner.class)
 public class QueryFactoryTest {
 
-
     @Mock
     private Record record;
 
     @Test
     public void creates_instances_of_insert_query() throws SQLException {
-
         final Connection connection = new ConnectionFactory().getConnection();
         final Query insertQuery = new QueryFactory(connection).generateInsertQuery(Collections.<String, Column>emptyMap(), Collections.<String, Map<String, Object>>emptyMap(), record);
         assertNotNull(insertQuery);

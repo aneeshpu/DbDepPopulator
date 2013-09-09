@@ -21,7 +21,7 @@ class AutoIncrementBasedCreation implements ColumnCreationStrategy {
 
         final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
 
-        final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.getName(), null);
+        final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.tableName(), null);
 
         final HashMap<String, Column> stringColumnHashMap = new HashMap<String, Column>();
 

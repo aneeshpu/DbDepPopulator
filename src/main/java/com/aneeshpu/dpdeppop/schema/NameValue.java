@@ -1,7 +1,7 @@
 package com.aneeshpu.dpdeppop.schema;
 
 
-class NameValue {
+public class NameValue {
     private final String columnName;
     private final Object columnValue;
 

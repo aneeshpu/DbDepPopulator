@@ -23,7 +23,7 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
 
         final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
 
-        final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.getName(), null);
+        final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.tableName(), null);
 
         final Map<String, Column> columnMap = new HashMap<String, Column>();
 
@@ -43,7 +43,7 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
             }
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Building column " + columnName + " of record " + record.getName());
+                LOG.debug("Building column " + columnName + " of record " + record.tableName());
             }
 
             columnMap.put(columnName, Column.buildColumn()

@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import com.aneeshpu.dpdeppop.schema.query.QueryFactory;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -19,6 +20,7 @@ public class Record {
     private final String name;
     private final Connection connection;
     private final Map<String, Map<String, Object>> preassignedValues;
+    private final QueryFactory queryFactory = new QueryFactory();
     private Map<String, Record> parentTables;
     private final Map<String, Column> columns;
     private final ColumnCreationStrategy columnCreationStrategy;
@@ -27,7 +29,6 @@ public class Record {
         this.name = name;
         this.connection = connection;
         this.preassignedValues = preassignedValues;
-//        parentTables = new HashMap<String, Record>();
         columns = new HashMap<String, Column>();
         this.columnCreationStrategy = columnCreationStrategy;
     }
@@ -48,7 +49,7 @@ public class Record {
         }
     }
 
-    String getName() {
+    public String tableName() {
         return name;
     }
 
@@ -146,27 +147,23 @@ public class Record {
         for (Map.Entry<String, Record> entry : parentTables.entrySet()) {
 
             final Record parentRecord = entry.getValue();
-//            final Map<String, Record> parentTables = parentRecord.populate(false);
             parentRecord.insertDefaultValuesIntoCurrentTable();
             tables.put(parentRecord.name, parentRecord);
-//            final Map<String, Record> parentTables = parentRecord.populate(false);
 
             tables.putAll(parentTables);
         }
     }
 
     private String insertDefaultValuesIntoCurrentTable() throws SQLException {
-        final String insertSQL = generateInsertQuery();
+        final String insertSQL = queryFactory.generateInsertQuery(columns, this.preassignedValues, this);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("insert query: " + insertSQL);
         }
 
         final Statement statement = connection.createStatement();
-//        statement.executeUpdate(insertSQL, Statement.RETURN_GENERATED_KEYS);
         statement.execute(insertSQL);
 
-//        final ResultSet generatedKeys = statement.getGeneratedKeys();
         final ResultSet generatedKeys = statement.getResultSet();
         setGeneratedValuesOnColumns(generatedKeys, getColumnsWithGeneratedValues());
         return insertSQL;
@@ -191,43 +188,6 @@ public class Record {
         }
 
         return columnsWithGeneratedValues;
-    }
-
-    private String generateInsertQuery() throws SQLException {
-        final Set<Map.Entry<String, Column>> entrySet = columns.entrySet();
-
-        //TODO:create a method for generating a formatted name
-        final StringBuilder fullQuery = new StringBuilder(String.format("insert into \"%s\" ", name));
-        StringBuilder columnNamesPartOfQuery = new StringBuilder("(");
-        final StringBuilder valuesPartOfQuery = new StringBuilder("(");
-
-        for (Map.Entry<String, Column> stringColumnEntry : entrySet) {
-
-            final Column column = stringColumnEntry.getValue();
-            if (column.isAutoIncrement()) {
-                continue;
-            }
-
-            final NameValue nameValue = column.nameValue(this.preassignedValues);
-
-            //TODO:Push the formattedName and formattedValue method into Column
-            columnNamesPartOfQuery.append(nameValue.formattedName());
-            valuesPartOfQuery.append(nameValue.formattedValue());
-        }
-
-        columnNamesPartOfQuery.deleteCharAt(columnNamesPartOfQuery.length() - 1);
-        valuesPartOfQuery.deleteCharAt(valuesPartOfQuery.length() - 1);
-
-        columnNamesPartOfQuery.append(")");
-        valuesPartOfQuery.append(")");
-
-        fullQuery.append(columnNamesPartOfQuery.toString());
-        fullQuery.append(" values ");
-        fullQuery.append(valuesPartOfQuery.toString());
-        //TODO: add a formatted query string method for primary keys
-        fullQuery.append(" returning \"").append(getPrimaryKeys().get(0)).append("\"");
-
-        return fullQuery.toString();
     }
 
     public String name() {
@@ -315,7 +275,7 @@ public class Record {
 
     Map<String, ColumnTable> foreignKeyTableMap() throws SQLException {
 
-        final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, getName());
+        final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, tableName());
 
         final Map<String, ColumnTable> foreignKeys = new HashMap<String, ColumnTable>();
         while (crossReference.next()) {

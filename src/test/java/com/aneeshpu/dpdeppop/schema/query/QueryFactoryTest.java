@@ -23,7 +23,7 @@ public class QueryFactoryTest {
     @Test
     public void creates_instances_of_insert_query() throws SQLException {
 
-        final Insert insertQuery = QueryFactory.generateInsertQuery(Collections.<String, Column>emptyMap(), Collections.<String, Map<String, Object>>emptyMap(), record);
+        final Query insertQuery = QueryFactory.generateInsertQuery(Collections.<String, Column>emptyMap(), Collections.<String, Map<String, Object>>emptyMap(), record);
         assertNotNull(insertQuery);
     }
 }

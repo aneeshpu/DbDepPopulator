@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
-public class Insert {
+class Insert implements Query{
 
     private final Map<String, Column> columns;
     private final Map<String, Map<String, Object>> preassignedValues;

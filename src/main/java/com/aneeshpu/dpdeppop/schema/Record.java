@@ -1,6 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.query.Insert;
+import com.aneeshpu.dpdeppop.schema.query.Query;
 import com.aneeshpu.dpdeppop.schema.query.QueryFactory;
 import org.apache.log4j.Logger;
 
@@ -21,17 +21,19 @@ public class Record {
     private final String name;
     private final Connection connection;
     private final Map<String, Map<String, Object>> preassignedValues;
-    private final QueryFactory queryFactory = new QueryFactory();
+    private final QueryFactory queryFactory;
     private Map<String, Record> parentTables;
     private final Map<String, Column> columns;
     private final ColumnCreationStrategy columnCreationStrategy;
 
-    public Record(String name, final Connection connection, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy) {
+    public Record(String name, final Connection connection, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory) {
         this.name = name;
         this.connection = connection;
         this.preassignedValues = preassignedValues;
-        columns = new HashMap<String, Column>();
+        this.queryFactory = queryFactory;
         this.columnCreationStrategy = columnCreationStrategy;
+
+        columns = new HashMap<String, Column>();
     }
 
     private Record initialize(final Map<String, Record> parentTables) throws SQLException {
@@ -72,7 +74,7 @@ public class Record {
                 continue;
             }
 
-            parentTables.put(primaryKeyTableName, new Record(primaryKeyTableName, connection, preassignedValues, columnCreationStrategy).initialize(parentTables));
+            parentTables.put(primaryKeyTableName, new RecordBuilder().setName(primaryKeyTableName).setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables));
         }
 
         return parentTables;
@@ -156,7 +158,7 @@ public class Record {
     }
 
     private String insertDefaultValuesIntoCurrentTable() throws SQLException {
-        final Insert insertSQL = queryFactory.generateInsertQuery(columns, this.preassignedValues, this);
+        final Query insertSQL = queryFactory.generateInsertQuery(columns, this.preassignedValues, this);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("insert query: " + insertSQL);

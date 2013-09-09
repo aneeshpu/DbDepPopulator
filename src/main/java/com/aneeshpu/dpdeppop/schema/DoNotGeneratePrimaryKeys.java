@@ -9,12 +9,12 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
+class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
 
     public static final Logger LOG = Logger.getLogger(DoNotGeneratePrimaryKeys.class);
     private final Connection connection;
 
-    public DoNotGeneratePrimaryKeys(final Connection connection) {
+    DoNotGeneratePrimaryKeys(final Connection connection) {
         this.connection = connection;
     }
 

@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AutoIncrementBasedCreation implements ColumnCreationStrategy {
+class AutoIncrementBasedCreation implements ColumnCreationStrategy {
 
     private final Connection connection;
 

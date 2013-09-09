@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 public class Record {
@@ -203,53 +202,15 @@ public class Record {
     }
 
     public void delete() throws SQLException {
-        deleteSelf();
+        queryFactory.generateDeleteQuery(getPrimaryKeyColumn(), this.preassignedValues, name, this);
         deleteParents();
-/*
-        for (Map.Entry<String, Record> parentTablesEntrySet : parentTables.entrySet()) {
-            final Record parentTable = parentTablesEntrySet.getValue();
-            parentTable.deleteSelf();
-        }
-*/
-
     }
 
     private void deleteParents() throws SQLException {
         final ListIterator<Map.Entry<String, Record>> entryListIterator = new ArrayList<Map.Entry<String, Record>>(parentTables.entrySet()).listIterator(parentTables.size());
         while (entryListIterator.hasPrevious()) {
             final Map.Entry<String, Record> parentTableEntrySet = entryListIterator.previous();
-            parentTableEntrySet.getValue().deleteSelf();
-        }
-    }
-
-    private void deleteSelf() throws SQLException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("deleting record from " + this);
-        }
-        final Column primaryKeyColumn = getPrimaryKeyColumn();
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("deleting record id " + primaryKeyColumn.value() + " from table " + this);
-        }
-
-        //TODO:push formattedName and formattedValue into Column
-        final NameValue nameValue = primaryKeyColumn.nameValue(this.preassignedValues);
-        final String deleteQuery = String.format("delete from \"%s\" where %s=%s", name, nameValue.formattedNameWithoutTrailingComma(), nameValue.formattedValueWithoutTrailingComma());
-
-        if (LOG.isInfoEnabled()) {
-            LOG.info("delete query: " + deleteQuery);
-        }
-
-        final Statement deleteStatement = connection.createStatement();
-        final int noOfRowsDeleted = deleteStatement.executeUpdate(deleteQuery);
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("no of rows deleted from table " + this + " = " + noOfRowsDeleted);
-        }
-        if (noOfRowsDeleted <= 0) {
-            final String message = "could not delete " + this;
-            LOG.error(message);
-            throw new DbPopulatorException(message);
+            parentTableEntrySet.getValue().queryFactory.generateDeleteQuery(parentTableEntrySet.getValue().getPrimaryKeyColumn(), parentTableEntrySet.getValue().preassignedValues, parentTableEntrySet.getValue().name, parentTableEntrySet.getValue());
         }
     }
 

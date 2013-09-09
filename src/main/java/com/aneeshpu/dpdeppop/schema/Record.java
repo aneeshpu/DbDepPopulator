@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import com.aneeshpu.dpdeppop.schema.query.DeleteQuery;
 import com.aneeshpu.dpdeppop.schema.query.QueryFactory;
 import org.apache.log4j.Logger;
 
@@ -202,15 +203,21 @@ public class Record {
     }
 
     public void delete() throws SQLException {
-        queryFactory.generateDeleteQuery(getPrimaryKeyColumn(), this.preassignedValues, name, this);
+        deleteSelf();
+
         deleteParents();
+    }
+
+    private void deleteSelf() throws SQLException {
+        final DeleteQuery deleteQueryQuery = queryFactory.generateDeleteQuery(getPrimaryKeyColumn(), this.preassignedValues, this);
+        deleteQueryQuery.execute();
     }
 
     private void deleteParents() throws SQLException {
         final ListIterator<Map.Entry<String, Record>> entryListIterator = new ArrayList<Map.Entry<String, Record>>(parentTables.entrySet()).listIterator(parentTables.size());
         while (entryListIterator.hasPrevious()) {
             final Map.Entry<String, Record> parentTableEntrySet = entryListIterator.previous();
-            parentTableEntrySet.getValue().queryFactory.generateDeleteQuery(parentTableEntrySet.getValue().getPrimaryKeyColumn(), parentTableEntrySet.getValue().preassignedValues, parentTableEntrySet.getValue().name, parentTableEntrySet.getValue());
+            parentTableEntrySet.getValue().deleteSelf();
         }
     }
 

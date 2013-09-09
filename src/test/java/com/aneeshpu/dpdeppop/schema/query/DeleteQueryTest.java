@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeleteTest {
+public class DeleteQueryTest {
 
     @Mock
     private Record record;
@@ -48,9 +48,9 @@ public class DeleteTest {
             when(nameValue.formattedValueWithoutTrailingComma()).thenReturn("10");
 
             when(record.tableName()).thenReturn("account");
-            final Delete deleteQuery = new Delete(column, preassignedValues, record, connection);
+            final DeleteQuery deleteQueryQuery = new DeleteQuery(column, preassignedValues, record, connection);
 
-            assertThat(deleteQuery.toString(), is(equalTo("delete from \"account\" where \"id\"=10")));
+            assertThat(deleteQueryQuery.toString(), is(equalTo("delete from \"account\" where \"id\"=10")));
 
             verify(column).nameValue(any(Map.class));
             verify(nameValue).formattedNameWithoutTrailingComma();
@@ -91,9 +91,9 @@ public class DeleteTest {
             when(nameValue.formattedValueWithoutTrailingComma()).thenReturn(String.valueOf(generatedAccountId));
 
             when(record.tableName()).thenReturn("account");
-            final Delete deleteQuery = new Delete(column, preassignedValues, record, connection);
+            final DeleteQuery deleteQueryQuery = new DeleteQuery(column, preassignedValues, record, connection);
 
-            deleteQuery.execute();
+            deleteQueryQuery.execute();
 
             final Statement regularStatement = connection.createStatement();
             regularStatement.execute("Select count(*) from account where id = " + generatedAccountId);

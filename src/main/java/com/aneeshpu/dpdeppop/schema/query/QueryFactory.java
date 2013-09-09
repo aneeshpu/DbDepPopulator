@@ -18,25 +18,12 @@ public class QueryFactory {
         return new Insert(columns, preassignedValues, record, connection);
     }
 
-    public void generateDeleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final String tableName, final Record record) throws SQLException {
+    public DeleteQuery generateDeleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final Record record) throws SQLException {
 
-        final Delete deleteQuery = new Delete(primaryKeyColumn, preassignedValues, record, connection);
+        final DeleteQuery deleteQueryQuery = new DeleteQuery(primaryKeyColumn, preassignedValues, record, connection);
 
-        deleteQuery.execute();
+        return deleteQueryQuery;
 
-/*
-        final Statement deleteStatement = connection.createStatement();
-        final int noOfRowsDeleted = deleteStatement.executeUpdate(deleteQuery.toString());
-
-        if (Record.LOG.isDebugEnabled()) {
-            Record.LOG.debug("no of rows deleted from table " + record + " = " + noOfRowsDeleted);
-        }
-        if (noOfRowsDeleted <= 0) {
-            final String message = "could not delete " + record;
-            Record.LOG.error(message);
-            throw new DbPopulatorException(message);
-        }
-*/
     }
 
 }

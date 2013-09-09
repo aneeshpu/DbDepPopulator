@@ -1,12 +1,10 @@
 package com.aneeshpu.dpdeppop.schema.query;
 
 import com.aneeshpu.dpdeppop.schema.Column;
-import com.aneeshpu.dpdeppop.schema.DbPopulatorException;
 import com.aneeshpu.dpdeppop.schema.Record;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 
 public class QueryFactory {
@@ -21,8 +19,12 @@ public class QueryFactory {
     }
 
     public void generateDeleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final String tableName, final Record record) throws SQLException {
-        final Delete deleteQuery = deleteQuery(primaryKeyColumn, preassignedValues, tableName, record);
 
+        final Delete deleteQuery = new Delete(primaryKeyColumn, preassignedValues, record, connection);
+
+        deleteQuery.execute();
+
+/*
         final Statement deleteStatement = connection.createStatement();
         final int noOfRowsDeleted = deleteStatement.executeUpdate(deleteQuery.toString());
 
@@ -34,12 +36,7 @@ public class QueryFactory {
             Record.LOG.error(message);
             throw new DbPopulatorException(message);
         }
+*/
     }
 
-    private Delete deleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final String tableName, final Record record) {
-
-        //TODO:push formattedName and formattedValue into Column
-
-        return new Delete(primaryKeyColumn, preassignedValues, record);
-    }
 }

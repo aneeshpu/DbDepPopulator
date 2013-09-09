@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DoNotGeneratePrimaryKeysTest {
 
-    public static final Connection CONNECTION = new ConnectionFactory().invoke();
+    public static final Connection CONNECTION = new ConnectionFactory().getConnection();
 
     @Test
     public void does_not_generate_values_for_primary_keys() throws SQLException {

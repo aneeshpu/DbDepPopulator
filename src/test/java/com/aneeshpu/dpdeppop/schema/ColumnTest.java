@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ColumnTest {
 
-    private Connection connection = new ConnectionFactory().invoke();
+    private Connection connection = new ConnectionFactory().getConnection();
 
     @Mock
     private Record record;

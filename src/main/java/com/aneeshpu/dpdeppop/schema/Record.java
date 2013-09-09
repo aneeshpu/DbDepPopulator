@@ -74,7 +74,7 @@ public class Record {
                 continue;
             }
 
-            parentTables.put(primaryKeyTableName, new RecordBuilder().setName(primaryKeyTableName).setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables));
+            parentTables.put(primaryKeyTableName, new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables));
         }
 
         return parentTables;

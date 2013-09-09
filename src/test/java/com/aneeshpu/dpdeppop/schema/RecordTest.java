@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 public class RecordTest {
 
-    private final Connection connection = new ConnectionFactory().invoke();
+    private final Connection connection = new ConnectionFactory().getConnection();
     private Record paymentRecord;
 
     @Before
@@ -30,7 +30,7 @@ public class RecordTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        paymentRecord = new RecordBuilder().setName("payment").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
+        paymentRecord = new RecordBuilder().withQueryFactory(connection).setName("payment").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
     }
 
     @Test
@@ -56,7 +56,7 @@ public class RecordTest {
     public void generates_an_insert_query() throws SQLException {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final Record accountRecord = new RecordBuilder().setName("account").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
+        final Record accountRecord = new RecordBuilder().withQueryFactory(connection).setName("account").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
 
         final Map<String, Record> tables = accountRecord.populate(false);
         final Record generatedAccountRecord = tables.get("account");
@@ -74,7 +74,7 @@ public class RecordTest {
 
         preassignedValues.put("payment", values);
 
-        Record paymentRecord = new RecordBuilder().setName("payment").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
+        Record paymentRecord = new RecordBuilder().withQueryFactory(connection).setName("payment").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
 
         final boolean onlyPopulateParentTables = false;
         final Map<String, Record> generatedTables = paymentRecord.populate(onlyPopulateParentTables);
@@ -100,7 +100,7 @@ public class RecordTest {
 
         preassignedValues.put("payment", values);
 
-        Record paymentRecord = new RecordBuilder().setName("payment").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+        Record paymentRecord = new RecordBuilder().withQueryFactory(connection).setName("payment").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
 
         final boolean onlyPopulateParentTables = false;
         final Map<String, Record> generatedTables = paymentRecord.populate(onlyPopulateParentTables);
@@ -150,7 +150,7 @@ public class RecordTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        final Record refundRecord = new RecordBuilder().setName("refund").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
+        final Record refundRecord = new RecordBuilder().withQueryFactory(connection).setName("refund").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
         final Map<String, Record> populatedTables = refundRecord.populate(false);
 
         final Record populatedRefundRecord = populatedTables.get("refund");
@@ -173,7 +173,7 @@ public class RecordTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status","2");
         preassignedValues.put("payment", columnValues);
-        final Record refundRecord = new RecordBuilder().setName("refund").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+        final Record refundRecord = new RecordBuilder().withQueryFactory(connection).setName("refund").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
         final Map<String, Record> populatedTables = refundRecord.populate(false);
 
         refundRecord.delete();
@@ -199,7 +199,7 @@ public class RecordTest {
     @Test
     public void primary_keys_are_marked() throws SQLException {
 
-        final Record accountRecord = new RecordBuilder().setName("account").setConnection(connection).setPreassignedValues(Collections.<String, Map<String, Object>>emptyMap()).setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+        final Record accountRecord = new RecordBuilder().withQueryFactory(connection).setName("account").setConnection(connection).setPreassignedValues(Collections.<String, Map<String, Object>>emptyMap()).setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
         final Map<String, Record> populatedTables = accountRecord.populate(false);
 
         assertTrue(populatedTables.get("account").getColumn("id").isPrimaryKey());

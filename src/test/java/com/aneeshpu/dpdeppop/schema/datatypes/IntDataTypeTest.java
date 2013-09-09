@@ -15,7 +15,7 @@ import static org.junit.Assert.assertThat;
 
 public class IntDataTypeTest {
 
-    private Connection connection = new ConnectionFactory().invoke();
+    private Connection connection = new ConnectionFactory().getConnection();
 
     @Test
     public void generated_value_is_less_than_7() {

@@ -13,7 +13,7 @@ public class QueryFactory {
     public QueryFactory(final Connection connection) {
     }
 
-    public static Query generateInsertQuery(final Map<String, Column> columns, final Map<String, Map<String, Object>> preassignedValues, final Record record) throws SQLException {
+    public Query generateInsertQuery(final Map<String, Column> columns, final Map<String, Map<String, Object>> preassignedValues, final Record record) throws SQLException {
 
         return new Insert(columns, preassignedValues, record);
     }

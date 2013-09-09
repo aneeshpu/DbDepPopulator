@@ -14,7 +14,7 @@ import static org.junit.Assert.assertThat;
 
 public class SerialDataTypeTest {
 
-    private Connection connection = new ConnectionFactory().invoke();
+    private Connection connection = new ConnectionFactory().getConnection();
 
 
     @Test

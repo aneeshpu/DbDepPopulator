@@ -15,7 +15,7 @@ import static org.junit.Assert.assertThat;
 
 public class CharacterDataTypeTest {
 
-    private final Connection connection = new ConnectionFactory().invoke();
+    private final Connection connection = new ConnectionFactory().getConnection();
 
     @Test
     public void generates_a_default_value(){

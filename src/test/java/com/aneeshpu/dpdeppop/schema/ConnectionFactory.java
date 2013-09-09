@@ -9,7 +9,7 @@ import java.sql.SQLException;
 public class ConnectionFactory {
     private static final Logger LOG = Logger.getLogger(ConnectionFactory.class);
 
-    public Connection invoke() {
+    public Connection getConnection() {
         final String url = "jdbc:postgresql://localhost/datapopulator_test";
         final String username = "datapopulator";
         try {

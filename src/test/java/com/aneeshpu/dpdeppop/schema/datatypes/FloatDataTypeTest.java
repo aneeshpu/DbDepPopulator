@@ -16,7 +16,7 @@ import static org.junit.Assert.assertThat;
 
 public class FloatDataTypeTest {
 
-    private Connection connection = new ConnectionFactory().invoke();
+    private Connection connection = new ConnectionFactory().getConnection();
 
     @Test
     public void generates_a_float_value() {

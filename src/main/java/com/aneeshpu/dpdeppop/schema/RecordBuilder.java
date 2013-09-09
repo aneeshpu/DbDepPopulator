@@ -33,7 +33,6 @@ public class RecordBuilder {
     }
 
     public RecordBuilder withQueryFactory(final Connection connection) {
-
         this.queryFactory = new QueryFactory(connection);
         return this;
     }

@@ -34,7 +34,7 @@ public class QueryFactoryTest {
     public void creates_instances_of_delete_query() throws SQLException {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final DeleteQuery deleteQueryQuery = new QueryFactory(null).generateDeleteQuery(primaryKeyColumn, preassignedValues, record);
+        final Query deleteQueryQuery = new QueryFactory(null).generateDeleteQuery(primaryKeyColumn, preassignedValues, record);
 
         Assert.assertNotNull(deleteQueryQuery);
     }

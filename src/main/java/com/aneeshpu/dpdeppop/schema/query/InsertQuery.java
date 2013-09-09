@@ -12,16 +12,16 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.Set;
 
-class Insert implements Query{
+class InsertQuery implements Query{
 
     private final Map<String, Column> columns;
     private final Map<String, Map<String, Object>> preassignedValues;
     private final Record record;
     private final Connection connection;
 
-    public static final Logger LOG = Logger.getLogger(Insert.class);
+    public static final Logger LOG = Logger.getLogger(InsertQuery.class);
 
-    public Insert(final Map<String, Column> columns, final Map<String, Map<String, Object>> preassignedValues, final Record record, final Connection connection) {
+    public InsertQuery(final Map<String, Column> columns, final Map<String, Map<String, Object>> preassignedValues, final Record record, final Connection connection) {
         this.columns = columns;
         this.preassignedValues = preassignedValues;
         this.record = record;

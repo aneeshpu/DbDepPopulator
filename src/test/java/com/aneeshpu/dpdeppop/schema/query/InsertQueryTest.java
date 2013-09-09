@@ -65,8 +65,8 @@ public class InsertQueryTest {
         when(record.getPrimaryKeys()).thenReturn(primaryKeys);
 
         final Connection connection = new ConnectionFactory().getConnection();
-        final Insert insertQuery = new Insert(columns(), preassignedValues(), record, connection);
-        final String queryString = insertQuery.toString();
+        final InsertQuery insertQueryQuery = new InsertQuery(columns(), preassignedValues(), record, connection);
+        final String queryString = insertQueryQuery.toString();
 
         assertThat(queryString, is(equalTo("insert into \"payment\" (\"invoice_id\",\"amount\",\"status\") values (1,10,2) returning \"id\"")));
     }
@@ -81,9 +81,9 @@ public class InsertQueryTest {
 
         final Connection connection = new ConnectionFactory().getConnection();
         connection.setAutoCommit(false);
-        final Insert insertQuery = new Insert(accountColumns(), preassignedValues(), record, connection);
+        final InsertQuery insertQueryQuery = new InsertQuery(accountColumns(), preassignedValues(), record, connection);
 
-        final ResultSet resultSet = insertQuery.execute();
+        final ResultSet resultSet = insertQueryQuery.execute();
 
         if (!resultSet.next()) {
             connection.rollback();

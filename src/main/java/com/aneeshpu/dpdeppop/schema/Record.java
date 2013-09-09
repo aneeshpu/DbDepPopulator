@@ -1,6 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.query.DeleteQuery;
+import com.aneeshpu.dpdeppop.schema.query.Query;
 import com.aneeshpu.dpdeppop.schema.query.QueryFactory;
 import org.apache.log4j.Logger;
 
@@ -209,7 +209,7 @@ public class Record {
     }
 
     private void deleteSelf() throws SQLException {
-        final DeleteQuery deleteQueryQuery = queryFactory.generateDeleteQuery(getPrimaryKeyColumn(), this.preassignedValues, this);
+        final Query deleteQueryQuery = queryFactory.generateDeleteQuery(getPrimaryKeyColumn(), this.preassignedValues, this);
         deleteQueryQuery.execute();
     }
 

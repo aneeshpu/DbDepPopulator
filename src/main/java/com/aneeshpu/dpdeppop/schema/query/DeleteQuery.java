@@ -11,13 +11,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-public class DeleteQuery implements Query {
+class DeleteQuery implements Query {
     private final Column primaryKeyColumn;
     private final Map<String, Map<String, Object>> preassignedValues;
     private final Record record;
     private final Connection connection;
 
-    public DeleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final Record record, final Connection connection) {
+    DeleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final Record record, final Connection connection) {
         this.primaryKeyColumn = primaryKeyColumn;
         this.preassignedValues = preassignedValues;
         this.record = record;

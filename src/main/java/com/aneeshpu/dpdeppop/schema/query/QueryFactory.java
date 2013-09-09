@@ -15,10 +15,10 @@ public class QueryFactory {
     }
 
     public Query generateInsertQuery(final Map<String, Column> columns, final Map<String, Map<String, Object>> preassignedValues, final Record record) throws SQLException {
-        return new Insert(columns, preassignedValues, record, connection);
+        return new InsertQuery(columns, preassignedValues, record, connection);
     }
 
-    public DeleteQuery generateDeleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final Record record) throws SQLException {
+    public Query generateDeleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final Record record) throws SQLException {
 
         final DeleteQuery deleteQueryQuery = new DeleteQuery(primaryKeyColumn, preassignedValues, record, connection);
 

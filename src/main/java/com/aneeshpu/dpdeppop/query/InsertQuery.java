@@ -1,4 +1,4 @@
-package com.aneeshpu.dpdeppop.schema.query;
+package com.aneeshpu.dpdeppop.query;
 
 import com.aneeshpu.dpdeppop.DBDepPopException;import com.aneeshpu.dpdeppop.schema.Column;
 import com.aneeshpu.dpdeppop.schema.NameValue;

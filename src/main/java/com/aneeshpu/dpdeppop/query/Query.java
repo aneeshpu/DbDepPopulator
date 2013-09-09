@@ -1,4 +1,4 @@
-package com.aneeshpu.dpdeppop.schema.query;
+package com.aneeshpu.dpdeppop.query;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

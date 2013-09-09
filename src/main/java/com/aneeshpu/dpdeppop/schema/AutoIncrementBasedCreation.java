@@ -1,6 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.datatypes.DataTypeFactory;
+import com.aneeshpu.dpdeppop.datatypes.DataTypeFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

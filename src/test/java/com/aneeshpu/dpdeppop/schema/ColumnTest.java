@@ -1,6 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.datatypes.DataType;
+import com.aneeshpu.dpdeppop.datatypes.DataType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;

@@ -1,4 +1,4 @@
-package com.aneeshpu.dpdeppop.schema.datatypes;
+package com.aneeshpu.dpdeppop.datatypes;
 
 import com.aneeshpu.dpdeppop.schema.ConnectionFactory;
 import org.junit.Ignore;

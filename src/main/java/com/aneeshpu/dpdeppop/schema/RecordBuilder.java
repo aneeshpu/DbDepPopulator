@@ -1,6 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.query.QueryFactory;
+import com.aneeshpu.dpdeppop.query.QueryFactory;
 
 import java.sql.Connection;
 import java.util.Map;

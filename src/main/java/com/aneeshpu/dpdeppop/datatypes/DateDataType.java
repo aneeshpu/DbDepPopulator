@@ -1,4 +1,4 @@
-package com.aneeshpu.dpdeppop.schema.datatypes;
+package com.aneeshpu.dpdeppop.datatypes;
 
 import java.sql.Date;
 import java.sql.ResultSet;

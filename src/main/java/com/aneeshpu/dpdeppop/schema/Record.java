@@ -1,7 +1,7 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.query.Query;
-import com.aneeshpu.dpdeppop.schema.query.QueryFactory;
+import com.aneeshpu.dpdeppop.query.Query;
+import com.aneeshpu.dpdeppop.query.QueryFactory;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;

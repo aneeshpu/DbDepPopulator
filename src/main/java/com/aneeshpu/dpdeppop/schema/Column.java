@@ -1,6 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
-import com.aneeshpu.dpdeppop.schema.datatypes.DataType;
+import com.aneeshpu.dpdeppop.datatypes.DataType;
 import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;

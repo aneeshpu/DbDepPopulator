@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertNotNull;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class RecordFactoryTest {
 
@@ -24,8 +27,19 @@ public class RecordFactoryTest {
     }
 
     @Test
-    public void creates_an_instance_of_a_record(){
+    public void creates_an_instance_of_a_record_with_auto_increment_based_creation(){
         final Record record = RecordFactory.createRecordWithAutoIncrementBasedCreation("account", connection, preassignedValues);
         assertNotNull(record);
+        assertThat(record.tableName(), is(equalTo("account")));
+    }
+
+    @Test
+    public void creates_a_record_with_do_not_assign_primary_keys_based_creation(){
+        final Record record = RecordFactory.createRecordDontAssignPrimaryKeys("account", connection, preassignedValues);
+        assertNotNull(record);
+        assertThat(record.tableName(), is(equalTo("account")));
+
     }
 }
+
+

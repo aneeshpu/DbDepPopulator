@@ -30,7 +30,13 @@ public class RecordTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        paymentRecord = new RecordBuilder().withQueryFactory(connection).setName("payment").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord();
+        paymentRecord = new RecordBuilder()
+                .withQueryFactory(connection)
+                .setName("payment")
+                .setConnection(connection)
+                .setPreassignedValues(preassignedValues)
+                .setColumnCreationStrategy(new AutoIncrementBasedCreation(connection))
+                .createRecord();
     }
 
     @Test
@@ -100,7 +106,13 @@ public class RecordTest {
 
         preassignedValues.put("payment", values);
 
-        Record paymentRecord = new RecordBuilder().withQueryFactory(connection).setName("payment").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+        Record paymentRecord = new RecordBuilder()
+                .withQueryFactory(connection)
+                .setName("payment")
+                .setConnection(connection)
+                .setPreassignedValues(preassignedValues)
+                .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection))
+                .createRecord();
 
         final boolean onlyPopulateParentTables = false;
         final Map<String, Record> generatedTables = paymentRecord.populate(onlyPopulateParentTables);

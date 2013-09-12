@@ -1,19 +1,75 @@
-package com.aneeshpu.dpdeppop;
+package com.aneeshpu.dbdeppop;
 
+import com.aneeshpu.dpdeppop.schema.Record;
+import com.aneeshpu.dpdeppop.schema.RecordFactory;
 import com.aneeshpu.dpdeppop.utils.DBDepPopUtil;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 public class DbDepPopTest {
+
+    private String hostname;
+    private String dbName;
+    private String dbUsername;
+    private String dbPassword;
+
+    @Before
+    public void setup() throws IOException {
+        final Properties properties = new Properties();
+        final InputStream resourceAsStream = this.getClass().getResourceAsStream("db.credentials.properties");
+        properties.load(resourceAsStream);
+
+        hostname = properties.getProperty("db.hostname");
+        dbName = properties.getProperty("db.name");
+        dbUsername = properties.getProperty("db.username");
+        dbPassword = properties.getProperty("db.password");
+
+    }
+
+    @Test
+    @Ignore
+    public void what_is_wrong_with_populating_bil_invoice_table() throws SQLException, IOException {
+
+
+        final Connection connection = DriverManager.getConnection("jdbc:postgresql://" + hostname + "/" + dbName, dbUsername, dbPassword);
+//        final Connection connection = DriverManager.getConnection("jdbc:postgresql://384070-hmdb-n01.dev1.ord1.us.ci.rackspace.net/hostingmatrix", "smix_user", "password");
+        connection.setAutoCommit(false);
+
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Map<String, Object> columnValues = new HashMap<String, Object>();
+
+        columnValues.put("InvoiceItemTypeID", 8);
+        columnValues.put("BillableChargeStatusID", 1);
+
+        preassignedValues.put("BIL_BillableTax", columnValues);
+        Record invoiceTable = null;
+        try {
+            invoiceTable = RecordFactory.createRecordDontAssignPrimaryKeys("BIL_Invoice", connection, preassignedValues);
+            final Map<String, Record> populatedTables = invoiceTable.populate(true);
+        } finally {
+            invoiceTable.delete();
+            if (connection != null) {
+                connection.rollback();
+                connection.close();
+            }
+        }
+
+    }
 
     @Test
     @Ignore
     public void gets_metadata() throws SQLException {
 
 //        final Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost/datadeppop", "datapopulator", "letmein");
-        final Connection connection = DriverManager.getConnection("jdbc:postgresql://384070-hmdb-n01.dev1.ord1.us.ci.rackspace.net/hostingmatrix", "smix_user", "password");
+        final Connection connection = DriverManager.getConnection("jdbc:postgresql://" + hostname + "/" + dbName, dbUsername, dbPassword);
         final DatabaseMetaData metaData = connection.getMetaData();
         final ResultSet paymentTableResultSet = metaData.getColumns(null, null, "BIL_CreditCard", null);
         DBDepPopUtil.printCols(paymentTableResultSet.getMetaData(), "PTRS");
@@ -96,7 +152,7 @@ public class DbDepPopTest {
 
         DBDepPopUtil.printCols(generatedKeys.getMetaData(), "insert into account");
 
-        while(generatedKeys.next()){
+        while (generatedKeys.next()) {
             System.out.println(generatedKeys.getString("name"));
         }
 

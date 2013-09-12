@@ -1,6 +1,7 @@
 package com.aneeshpu.dpdeppop.query;
 
-import com.aneeshpu.dpdeppop.DBDepPopException;import com.aneeshpu.dpdeppop.schema.Column;
+import com.aneeshpu.dpdeppop.DBDepPopException;
+import com.aneeshpu.dpdeppop.schema.Column;
 import com.aneeshpu.dpdeppop.schema.NameValue;
 import com.aneeshpu.dpdeppop.schema.Record;
 import org.apache.log4j.Logger;
@@ -12,7 +13,7 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.Set;
 
-class InsertQuery implements Query{
+class InsertQuery implements Query {
 
     private final Map<String, Column> columns;
     private final Map<String, Map<String, Object>> preassignedValues;
@@ -30,6 +31,10 @@ class InsertQuery implements Query{
 
     @Override
     public String toString() {
+        return queryString();
+    }
+
+    private String queryString() {
         final Set<Map.Entry<String, Column>> columnsEntrySet = columns.entrySet();
 
         //TODO:create a method for generating a formatted name
@@ -67,7 +72,7 @@ class InsertQuery implements Query{
         } catch (SQLException e) {
             LOG.error("", e);
 
-            throw new DBDepPopException("Failed while trying to get primary keys of table," + record.tableName(),e);
+            throw new DBDepPopException("Failed while trying to get primary keys of table," + record.tableName(), e);
         }
 
         return fullQuery.toString();
@@ -80,7 +85,14 @@ class InsertQuery implements Query{
         }
 
         final Statement statement = connection.createStatement();
-        statement.execute(toString());
+        try {
+            statement.execute(queryString());
+        } catch (SQLException e) {
+
+            LOG.error("Failed to insert into table:" + record.tableName(), e);
+            throw e;
+
+        }
 
         return statement.getResultSet();
     }

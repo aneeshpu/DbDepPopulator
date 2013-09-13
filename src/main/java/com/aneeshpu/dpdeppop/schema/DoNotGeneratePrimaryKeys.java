@@ -19,11 +19,11 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
     }
 
     @Override
-    public Map<String, Column> populateColumns(final Record record) throws SQLException {
+    public Map<String, Column> populateColumns(final Record record, final Connection connection) throws SQLException {
 
-        final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
+        final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap(connection);
 
-        final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.tableName(), null);
+        final ResultSet columnsResultSet = this.connection.getMetaData().getColumns(null, null, record.tableName(), null);
 
         final Map<String, Column> columnMap = new HashMap<String, Column>();
 
@@ -51,10 +51,10 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
                     .withDataType(DataTypeFactory.create(dataType))
                     .withSize(Double.valueOf(columnSize))
                     .withIsNullable(isNullable)
-                    .withIsAutoIncrement(record.isPrimaryKey(columnName) ? YesNo.YES : YesNo.NO)
+                    .withIsAutoIncrement(record.isPrimaryKey(columnName, connection) ? YesNo.YES : YesNo.NO)
                     .withReferencingTable(referencingRecord)
                     .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
-                    .asPrimaryKey(record.isPrimaryKey(columnName))
+                    .asPrimaryKey(record.isPrimaryKey(columnName, connection))
                     .withTable(record).create());
         }
 

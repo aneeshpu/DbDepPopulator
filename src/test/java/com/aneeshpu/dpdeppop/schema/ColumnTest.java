@@ -29,8 +29,8 @@ public class ColumnTest {
     @Test
     public void considers_two_columns_from_the_same_table_with_same_names_are_equal() {
 
-        final Column idColumn = Column.buildColumn().withName("id").withTable(new RecordBuilder().setName("payment").setConnection(connection).setPreassignedValues(new HashMap<String, Map<String, Object>>()).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord()).create();
-        final Column anotherIdColumn = Column.buildColumn().withName("id").withTable(new RecordBuilder().setName("payment").setConnection(connection).setPreassignedValues(new HashMap<String, Map<String, Object>>()).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord()).create();
+        final Column idColumn = Column.buildColumn().withName("id").withTable(new RecordBuilder().setName("payment").setPreassignedValues(new HashMap<String, Map<String, Object>>()).setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord()).create();
+        final Column anotherIdColumn = Column.buildColumn().withName("id").withTable(new RecordBuilder().setName("payment").setPreassignedValues(new HashMap<String, Map<String, Object>>()).setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord()).create();
 
         assertThat(idColumn, is(equalTo(anotherIdColumn)));
     }

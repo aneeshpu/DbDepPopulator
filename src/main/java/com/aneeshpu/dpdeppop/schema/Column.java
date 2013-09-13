@@ -119,8 +119,7 @@ public class Column {
         } else if (autoIncrement.isTrue()) {
             nameValue = NameValue.createAutoIncrement();
 
-        } else {
-            nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue(preassignedValues).value()) : new NameValue(name, dataType.generateDefaultValue());
+        } else {nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue(preassignedValues).value()) : new NameValue(name, dataType.generateDefaultValue());
         }
         return nameValue;
     }
@@ -157,11 +156,15 @@ public class Column {
     }
 
     public Object value() {
-        return nameValue.value();
+        return nameValue == null ? null : nameValue.value();
     }
 
     public boolean isPrimaryKey() {
         return isPrimaryKey;
+    }
+
+    public boolean isAssigned() {
+        return nameValue != null && nameValue.isAssigned();
     }
 
     public static class ColumnBuilder {

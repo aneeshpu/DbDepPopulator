@@ -4,15 +4,10 @@ import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-/**
- * Created with IntelliJ IDEA.
- * User: aneeshpu
- * Date: 21/7/13
- * Time: 8:01 AM
- * To change this template use File | Settings | File Templates.
- */
 public class NameValueTest {
 
     @Test
@@ -35,5 +30,26 @@ public class NameValueTest {
     public void generates_formatted_column_name_string(){
         final NameValue amount = new NameValue("amount", "10");
         assertThat(amount.formattedName(), is(equalTo("\"amount\",")));
+    }
+
+
+    @Test
+    public void is_not_assigned_if_value_is_not_set(){
+        final NameValue amount = new NameValue("amount", null);
+        assertFalse(amount.isAssigned());
+
+    }
+
+    @Test
+    public void is_not_assigned_if_name_is_not_set(){
+        final NameValue amount = new NameValue(null, 10);
+        assertFalse(amount.isAssigned());
+    }
+
+    @Test
+    public void is_assigned_if_name_and_value_are_set(){
+        final NameValue amount = new NameValue("amount", 10);
+        assertTrue(amount.isAssigned());
+
     }
 }

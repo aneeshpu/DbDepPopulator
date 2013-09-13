@@ -64,4 +64,8 @@ public class NameValue {
         final String formattedName = formattedName();
         return formattedName.substring(0, formattedName.length() - 1);
     }
+
+    public boolean isAssigned() {
+        return columnName != null && columnValue != null;
+    }
 }

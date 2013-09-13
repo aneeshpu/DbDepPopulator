@@ -19,11 +19,7 @@ public class QueryFactory {
     }
 
     public Query generateDeleteQuery(final Column primaryKeyColumn, final Map<String, Map<String, Object>> preassignedValues, final Record record) throws SQLException {
-
-        final DeleteQuery deleteQueryQuery = new DeleteQuery(primaryKeyColumn, preassignedValues, record, connection);
-
-        return deleteQueryQuery;
-
+        //TODO: Push this to the column itself?
+        return !primaryKeyColumn.isAssigned() ? new NullQuery() : new DeleteQuery(primaryKeyColumn, preassignedValues, record, connection);
     }
-
 }

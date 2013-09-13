@@ -216,4 +216,28 @@ public class RecordTest {
 
         assertTrue(populatedTables.get("account").getColumn("id").isPrimaryKey());
     }
+
+    @Test
+    public void delete_does_not_fail_if_only_parent_tables_are_populated() throws SQLException {
+
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Map<String, Object> columnValues = new HashMap<String, Object>();
+        columnValues.put("status","2");
+        preassignedValues.put("payment", columnValues);
+        final Record refundRecord = new RecordBuilder().withQueryFactory(connection).setName("refund").setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+        final Map<String, Record> populatedTables = refundRecord.populate(true);
+
+        refundRecord.delete();
+
+        final Statement statement = connection.createStatement();
+        for (Map.Entry<String, Record> entrySet : populatedTables.entrySet()) {
+            final String query = String.format("select count(*) from %s where id=%s", entrySet.getKey(), entrySet.getValue().getColumn("id").value());
+            System.out.println("query:" + query);
+            statement.execute(query);
+            assertNoRows(statement.getResultSet());
+        }
+
+        statement.close();
+
+    }
 }

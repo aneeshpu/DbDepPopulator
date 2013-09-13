@@ -12,7 +12,9 @@ import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -25,7 +27,7 @@ public class ColumnTest {
 
 
     @Test
-    public void considers_two_columns_from_the_same_table_with_same_names_are_equal(){
+    public void considers_two_columns_from_the_same_table_with_same_names_are_equal() {
 
         final Column idColumn = Column.buildColumn().withName("id").withTable(new RecordBuilder().setName("payment").setConnection(connection).setPreassignedValues(new HashMap<String, Map<String, Object>>()).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord()).create();
         final Column anotherIdColumn = Column.buildColumn().withName("id").withTable(new RecordBuilder().setName("payment").setConnection(connection).setPreassignedValues(new HashMap<String, Map<String, Object>>()).setColumnCreationStrategy(new AutoIncrementBasedCreation(connection)).createRecord()).create();
@@ -34,21 +36,17 @@ public class ColumnTest {
     }
 
     @Test
-    public void prints_to_string_with_column_name(){
+    public void prints_to_string_with_column_name() {
         assertThat(Column.buildColumn().withName("id").create().toString(), is(equalTo("id")));
     }
 
     @Test
-    public void generates_a_name_value_pair_to_be_inserted_into_sql_query(){
+    public void generates_a_name_value_pair_to_be_inserted_into_sql_query() {
 
         final DataType<Float> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn(10f);
 
-        final Column amount = Column.buildColumn()
-                .withName("amount")
-                .withDataType(dataType)
-                .withTable(record)
-                .create();
+        final Column amount = Column.buildColumn().withName("amount").withDataType(dataType).withTable(record).create();
         final NameValue nameValue = amount.nameValue(new java.util.HashMap<String, java.util.Map<String, Object>>());
 
         assertThat(nameValue, is(equalTo(new NameValue("amount", 10f))));
@@ -57,7 +55,7 @@ public class ColumnTest {
     }
 
     @Test
-    public void a_foreign_key_column_uses_the_default_value_generated_by_the_referenced_column(){
+    public void a_foreign_key_column_uses_the_default_value_generated_by_the_referenced_column() {
 
         final DataType<Float> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn(321f);
@@ -68,12 +66,7 @@ public class ColumnTest {
         final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         when(idColumnInInvoiceTable.nameValue(preassignedValues)).thenReturn(new NameValue("id", primaryKeyInInvoiceTable));
 
-        final Column invoiceIdColumn = Column.buildColumn()
-                                    .withName("invoice_id")
-                                    .withReferencingColumn(idColumnInInvoiceTable)
-                                    .withDataType(dataType)
-                                    .withTable(record)
-                                    .create();
+        final Column invoiceIdColumn = Column.buildColumn().withName("invoice_id").withReferencingColumn(idColumnInInvoiceTable).withDataType(dataType).withTable(record).create();
         assertThat(invoiceIdColumn.nameValue(preassignedValues), is(equalTo(new NameValue("invoice_id", primaryKeyInInvoiceTable))));
 
         verify(dataType, never()).generateDefaultValue();
@@ -81,16 +74,12 @@ public class ColumnTest {
     }
 
     @Test
-    public void creates_a_formatted_query_string(){
+    public void creates_a_formatted_query_string() {
 
         final DataType<String> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn("'c'");
 
-        final Column amount = Column.buildColumn()
-                .withName("amount")
-                .withDataType(dataType)
-                .withTable(record)
-                .create();
+        final Column amount = Column.buildColumn().withName("amount").withDataType(dataType).withTable(record).create();
         final NameValue nameValue = amount.nameValue(new java.util.HashMap<String, java.util.Map<String, Object>>());
 
         assertThat(nameValue.formattedValue(), is(equalTo("'c',")));
@@ -100,26 +89,58 @@ public class ColumnTest {
     }
 
     @Test
-    public void uses_a_preassigned_value_if_passed_in(){
+    public void uses_a_preassigned_value_if_passed_in() {
         final DataType<Float> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn(10f);
 
         final Record record = mock(Record.class);
         when(record.name()).thenReturn("payment");
 
-        final Column amount = Column.buildColumn().withTable(record).withName("status").withDataType(dataType).create();
-        final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final HashMap<String, Object> values = new HashMap<String, Object>();
+        final Column status = Column.buildColumn().withTable(record).withName("status").withDataType(dataType).create();
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Map<String, Object> values = new HashMap<String, Object>();
         values.put("status", 2);
 
         preassignedValues.put("payment", values);
 
-        final NameValue nameValue = amount.nameValue(preassignedValues);
+        final NameValue nameValue = status.nameValue(preassignedValues);
 
         assertThat(nameValue, is(equalTo(new NameValue("status", 2))));
 
         verify(record, atLeastOnce()).name();
         verify(dataType, never()).generateDefaultValue();
 
+    }
+
+    @Test
+    public void a_column_with_nameValue_set_is_considered_assigned(){
+
+        final DataType<Float> dataType = mock(DataType.class);
+
+        final Record record = mock(Record.class);
+        when(record.name()).thenReturn("payment");
+
+        final Column status = Column.buildColumn().withTable(record).withName("status").withDataType(dataType).create();
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        preassignedValues.put("payment", new HashMap<String, Object>(){{
+            put("status", 1);
+        }});
+
+        status.nameValue(preassignedValues);
+
+        assertTrue(status.isAssigned());
+
+        verify(record, atLeastOnce()).name();
+    }
+
+    @Test
+    public void a_column_with_null_for_nameValue_is_unassigned(){
+        final DataType<Float> dataType = mock(DataType.class);
+
+        final Record record = mock(Record.class);
+
+        final Column status = Column.buildColumn().withTable(record).withName("status").withDataType(dataType).create();
+
+        assertFalse(status.isAssigned());
     }
 }

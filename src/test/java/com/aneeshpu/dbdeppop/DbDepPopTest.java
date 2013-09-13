@@ -53,9 +53,9 @@ public class DbDepPopTest {
         Record invoiceTable = null;
         try {
             invoiceTable = RecordFactory.createRecordDontAssignPrimaryKeys("BIL_Invoice", connection, preassignedValues);
-            final Map<String, Record> populatedTables = invoiceTable.populate(true);
+            final Map<String, Record> populatedTables = invoiceTable.populate(true, connection);
         } finally {
-            invoiceTable.delete();
+            invoiceTable.delete(connection);
             if (connection != null) {
                 connection.rollback();
                 connection.close();

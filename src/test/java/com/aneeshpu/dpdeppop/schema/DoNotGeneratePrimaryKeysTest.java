@@ -10,7 +10,6 @@ import java.util.Map;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class DoNotGeneratePrimaryKeysTest {
 
@@ -22,7 +21,7 @@ public class DoNotGeneratePrimaryKeysTest {
         final DoNotGeneratePrimaryKeys doNotGeneratePrimaryKeys = new DoNotGeneratePrimaryKeys(CONNECTION);
 
         final Record accountRecord = new RecordBuilder().setName("account").setConnection(CONNECTION).setPreassignedValues(Collections.<String, Map<String, Object>>emptyMap()).setColumnCreationStrategy(doNotGeneratePrimaryKeys).createRecord();
-        final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord);
+        final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord, CONNECTION);
 
         final Column id = populatedColumns.get("id");
         assertThat(id, is(equalTo(Column.buildColumn().withTable(accountRecord).withName("id").create())));

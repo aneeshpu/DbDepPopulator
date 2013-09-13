@@ -62,9 +62,9 @@ public class InsertQueryTest {
         when(record.tableName()).thenReturn("payment");
         final ArrayList<String> primaryKeys = new ArrayList<String>();
         primaryKeys.add("id");
-        when(record.getPrimaryKeys()).thenReturn(primaryKeys);
-
         final Connection connection = new ConnectionFactory().getConnection();
+        when(record.getPrimaryKeys(connection)).thenReturn(primaryKeys);
+
         final InsertQuery insertQueryQuery = new InsertQuery(columns(), preassignedValues(), record, connection);
         final String queryString = insertQueryQuery.toString();
 
@@ -77,9 +77,9 @@ public class InsertQueryTest {
         when(record.tableName()).thenReturn("account");
         final ArrayList<String> primaryKeys = new ArrayList<String>();
         primaryKeys.add("id");
-        when(record.getPrimaryKeys()).thenReturn(primaryKeys);
 
         final Connection connection = new ConnectionFactory().getConnection();
+        when(record.getPrimaryKeys(connection)).thenReturn(primaryKeys);
         connection.setAutoCommit(false);
         final InsertQuery insertQueryQuery = new InsertQuery(accountColumns(), preassignedValues(), record, connection);
 

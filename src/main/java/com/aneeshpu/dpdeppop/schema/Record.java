@@ -18,16 +18,15 @@ public class Record {
     public static final String COLUMN_NAME = "column_name";
 
     private final String name;
-    private final Connection connection;
     private final Map<String, Map<String, Object>> preassignedValues;
     private final QueryFactory queryFactory;
-    private Map<String, Record> parentTables;
     private final Map<String, Column> columns;
     private final ColumnCreationStrategy columnCreationStrategy;
 
-    public Record(String name, final Connection connection, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory) {
+    private Map<String, Record> parentTables;
+
+    public Record(String name, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory) {
         this.name = name;
-        this.connection = connection;
         this.preassignedValues = preassignedValues;
         this.queryFactory = queryFactory;
         this.columnCreationStrategy = columnCreationStrategy;
@@ -35,11 +34,11 @@ public class Record {
         columns = new HashMap<String, Column>();
     }
 
-    private Record initialize(final Map<String, Record> parentTables) throws SQLException {
+    private Record initialize(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
 
         try {
-            this.parentTables = populateParents(parentTables);
-            final Map<String, Column> stringColumnHashMap = columnCreationStrategy.populateColumns(this);
+            this.parentTables = populateParents(parentTables, connection);
+            final Map<String, Column> stringColumnHashMap = columnCreationStrategy.populateColumns(this, connection);
             columns.putAll(stringColumnHashMap);
 
             return this;
@@ -59,7 +58,7 @@ public class Record {
         return columns.get(columnName);
     }
 
-    private Map<String, Record> populateParents(final Map<String, Record> parentTables) throws SQLException {
+    private Map<String, Record> populateParents(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
         final ResultSet importedKeysResultSet = connection.getMetaData().getImportedKeys(null, null, name);
 
         while (importedKeysResultSet.next()) {
@@ -73,7 +72,7 @@ public class Record {
                 continue;
             }
 
-            parentTables.put(primaryKeyTableName, new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables));
+            parentTables.put(primaryKeyTableName, new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables, connection));
         }
 
         return parentTables;
@@ -124,12 +123,12 @@ public class Record {
         return columns;
     }
 
-    public Map<String, Record> populate(final boolean onlyPopulateParentTables) throws SQLException {
+    public Map<String, Record> populate(final boolean onlyPopulateParentTables, final Connection connection) throws SQLException {
 
-        initialize(new LinkedHashMap<String, Record>());
+        initialize(new LinkedHashMap<String, Record>(), connection);
 
         final Map<String, Record> tables = new HashMap<String, Record>();
-        insertDefaultValuesIntoParentTables(tables);
+        insertDefaultValuesIntoParentTables(tables, connection);
 
         if (onlyPopulateParentTables) {
             if (LOG.isInfoEnabled()) {
@@ -138,30 +137,30 @@ public class Record {
             return tables;
         }
 
-        insertDefaultValuesIntoCurrentTable();
+        insertDefaultValuesIntoCurrentTable(connection);
 
         tables.put(name, this);
         return tables;
     }
 
-    private void insertDefaultValuesIntoParentTables(final Map<String, Record> tables) throws SQLException {
+    private void insertDefaultValuesIntoParentTables(final Map<String, Record> tables, final Connection connection) throws SQLException {
 
         for (Map.Entry<String, Record> entry : parentTables.entrySet()) {
 
             final Record parentRecord = entry.getValue();
-            parentRecord.insertDefaultValuesIntoCurrentTable();
+            parentRecord.insertDefaultValuesIntoCurrentTable(connection);
             tables.put(parentRecord.name, parentRecord);
 
             tables.putAll(parentTables);
         }
     }
 
-    private String insertDefaultValuesIntoCurrentTable() throws SQLException {
+    private String insertDefaultValuesIntoCurrentTable(final Connection connection) throws SQLException {
 
-        final ResultSet generatedKeys = queryFactory.generateInsertQuery(columns, this.preassignedValues, this).execute();
+        final ResultSet generatedKeys = queryFactory.generateInsertQuery(columns, this.preassignedValues, this, connection).execute();
         setGeneratedValuesOnColumns(generatedKeys, getColumnsWithGeneratedValues());
 
-        return queryFactory.generateInsertQuery(columns, this.preassignedValues, this).toString();
+        return queryFactory.generateInsertQuery(columns, this.preassignedValues, this, connection).toString();
     }
 
     private void setGeneratedValuesOnColumns(final ResultSet generatedKeys, final Map<String, Column> columnsWithGeneratedValues) throws SQLException {
@@ -189,7 +188,7 @@ public class Record {
         return name;
     }
 
-    public List<String> getPrimaryKeys() throws SQLException {
+    public List<String> getPrimaryKeys(final Connection connection) throws SQLException {
         final ResultSet primaryKeysResultSet = connection.getMetaData().getPrimaryKeys(null, null, name);
 
         final List<String> primaryKeys = new ArrayList<String>();
@@ -202,22 +201,23 @@ public class Record {
 
     }
 
-    public void delete() throws SQLException {
-        deleteSelf();
+    public void delete(final Connection connection) throws SQLException {
+        deleteSelf(connection);
 
-        deleteParents();
+        deleteParents(connection);
     }
 
-    private void deleteSelf() throws SQLException {
-        final Query deleteQueryQuery = queryFactory.generateDeleteQuery(getPrimaryKeyColumn(), this.preassignedValues, this);
+    private void deleteSelf(final Connection connection) throws SQLException {
+        final Query deleteQueryQuery = queryFactory.generateDeleteQuery(getPrimaryKeyColumn(), this.preassignedValues, this, connection);
         deleteQueryQuery.execute();
     }
 
-    private void deleteParents() throws SQLException {
+    private void deleteParents(final Connection connection) throws SQLException {
         final ListIterator<Map.Entry<String, Record>> entryListIterator = new ArrayList<Map.Entry<String, Record>>(parentTables.entrySet()).listIterator(parentTables.size());
+
         while (entryListIterator.hasPrevious()) {
             final Map.Entry<String, Record> parentTableEntrySet = entryListIterator.previous();
-            parentTableEntrySet.getValue().deleteSelf();
+            parentTableEntrySet.getValue().deleteSelf(connection);
         }
     }
 
@@ -231,12 +231,12 @@ public class Record {
 
     }
 
-    public boolean isPrimaryKey(final String columnName) throws SQLException {
-        final List<String> primaryKeys = getPrimaryKeys();
+    public boolean isPrimaryKey(final String columnName, final Connection connection) throws SQLException {
+        final List<String> primaryKeys = getPrimaryKeys(connection);
         return primaryKeys.contains(columnName);
     }
 
-    Map<String, ColumnTable> foreignKeyTableMap() throws SQLException {
+    Map<String, ColumnTable> foreignKeyTableMap(final Connection connection) throws SQLException {
 
         final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, tableName());
 

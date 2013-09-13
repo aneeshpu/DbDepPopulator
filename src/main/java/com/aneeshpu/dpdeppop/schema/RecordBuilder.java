@@ -7,7 +7,6 @@ import java.util.Map;
 
 public class RecordBuilder {
     private String name;
-    private Connection connection;
     private Map<String, Map<String, Object>> preassignedValues;
     private ColumnCreationStrategy columnCreationStrategy;
     private QueryFactory queryFactory;
@@ -18,7 +17,6 @@ public class RecordBuilder {
     }
 
     public RecordBuilder setConnection(final Connection connection) {
-        this.connection = connection;
         return this;
     }
 
@@ -33,11 +31,11 @@ public class RecordBuilder {
     }
 
     public RecordBuilder withQueryFactory(final Connection connection) {
-        this.queryFactory = new QueryFactory(connection);
+        this.queryFactory = new QueryFactory();
         return this;
     }
 
     public Record createRecord() {
-        return new Record(name, connection, preassignedValues, columnCreationStrategy, queryFactory);
+        return new Record(name, preassignedValues, columnCreationStrategy, queryFactory);
     }
 }

@@ -68,7 +68,7 @@ class InsertQuery implements Query {
 
         //TODO: add a formatted query string method for primary keys
         try {
-            fullQuery.append(" returning \"").append(record.getPrimaryKeys().get(0)).append("\"");
+            fullQuery.append(" returning \"").append(record.getPrimaryKeys(connection).get(0)).append("\"");
         } catch (SQLException e) {
             LOG.error("", e);
 

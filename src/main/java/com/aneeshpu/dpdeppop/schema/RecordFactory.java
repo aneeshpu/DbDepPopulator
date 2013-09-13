@@ -9,7 +9,7 @@ public class RecordFactory {
                 .setName(tableName)
                 .setConnection(connection)
                 .setPreassignedValues(preassignedValues)
-                .setColumnCreationStrategy(new AutoIncrementBasedCreation(connection))
+                .setColumnCreationStrategy(new AutoIncrementBasedCreation())
                 .withQueryFactory(connection)
                 .createRecord();
     }

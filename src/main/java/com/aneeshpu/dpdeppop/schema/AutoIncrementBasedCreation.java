@@ -10,16 +10,13 @@ import java.util.Map;
 
 class AutoIncrementBasedCreation implements ColumnCreationStrategy {
 
-    private final Connection connection;
-
-    public AutoIncrementBasedCreation(final Connection connection) {
-        this.connection = connection;
+    public AutoIncrementBasedCreation() {
     }
 
     @Override
-    public Map<String, Column> populateColumns(final Record record) throws SQLException {
+    public Map<String, Column> populateColumns(final Record record, final Connection connection) throws SQLException {
 
-        final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
+        final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap(connection);
 
         final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.tableName(), null);
 
@@ -49,7 +46,7 @@ class AutoIncrementBasedCreation implements ColumnCreationStrategy {
                     .withReferencingTable(referencingRecord)
                     .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
                     .withTable(record)
-                    .asPrimaryKey(record.isPrimaryKey(columnName))
+                    .asPrimaryKey(record.isPrimaryKey(columnName, connection))
                     .create());
         }
 

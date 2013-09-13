@@ -2,7 +2,6 @@ package com.aneeshpu.dpdeppop.query;
 
 import com.aneeshpu.dpdeppop.schema.Column;
 import com.aneeshpu.dpdeppop.schema.Record;
-import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -13,7 +12,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertNotNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QueryFactoryTest {
@@ -33,9 +35,25 @@ public class QueryFactoryTest {
     @Test
     public void creates_instances_of_delete_query() throws SQLException {
 
+        when(primaryKeyColumn.isAssigned()).thenReturn(true);
+
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final Query deleteQueryQuery = new QueryFactory(null).generateDeleteQuery(primaryKeyColumn, preassignedValues, record);
 
-        Assert.assertNotNull(deleteQueryQuery);
+        assertNotNull(deleteQueryQuery);
+
+        verify(primaryKeyColumn).isAssigned();
+    }
+
+    @Test
+    public void creates_null_query_if_column_is_not_assigned() throws SQLException {
+        when(primaryKeyColumn.isAssigned()).thenReturn(false);
+
+        final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
+        final Query deleteQueryQuery = new QueryFactory(null).generateDeleteQuery(primaryKeyColumn, preassignedValues, record);
+
+        assertTrue(deleteQueryQuery.getClass().equals(NullQuery.class));
+
+        verify(primaryKeyColumn).isAssigned();
     }
 }

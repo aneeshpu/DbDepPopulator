@@ -40,10 +40,7 @@ class AutoIncrementBasedCreation implements ColumnCreationStrategy {
 
             stringColumnHashMap.put(columnName, Column.buildColumn().withName(columnName)
                     .withDataType(DataTypeFactory.create(dataType))
-                    .withSize(Double.valueOf(columnSize))
-                    .withIsNullable(isNullable)
                     .withIsAutoIncrement(isAutoIncrement)
-                    .withReferencingTable(referencingRecord)
                     .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
                     .withTable(record)
                     .asPrimaryKey(record.isPrimaryKey(columnName, connection))

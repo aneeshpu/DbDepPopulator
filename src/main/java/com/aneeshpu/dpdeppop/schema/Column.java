@@ -119,7 +119,8 @@ public class Column {
         } else if (autoIncrement.isTrue()) {
             nameValue = NameValue.createAutoIncrement();
 
-        } else {nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue(preassignedValues).value()) : new NameValue(name, dataType.generateDefaultValue());
+        } else {
+            nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue(preassignedValues).value()) : new NameValue(name, dataType.generateDefaultValue());
         }
         return nameValue;
     }

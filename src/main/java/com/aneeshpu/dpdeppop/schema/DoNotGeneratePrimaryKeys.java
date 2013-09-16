@@ -32,7 +32,7 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
             final String columnSize = columnsResultSet.getString(Column.COLUMN_SIZE);
             final String isNullable = columnsResultSet.getString(Column.IS_NULLABLE);
 
-            final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap(connection);
+            final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
             final ColumnTable columnTable = foreignKeyTables.get(columnName);
             Record referencingRecord = null;
             String primaryKeyColName = null;

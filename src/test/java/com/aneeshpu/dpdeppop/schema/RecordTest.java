@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,11 +24,18 @@ public class RecordTest {
 
     @Before
     public void setup() throws SQLException {
+        connection.setAutoCommit(false);
         final HashMap<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
         paymentRecord = new RecordBuilder().withQueryFactory(connection).setName("payment").setConnection(connection).withPreassignedValues(preassignedValues).setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord();
+    }
+
+    @After
+    public void teardown() throws SQLException {
+
+        connection.rollback();
     }
 
     @Test

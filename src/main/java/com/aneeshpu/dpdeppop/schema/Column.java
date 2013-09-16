@@ -65,7 +65,8 @@ public class Column {
             return nameValue;
 
         } else if (isPreAssigned(preassignedValues)) {
-            nameValue = getPreassignedNameValue(preassignedValues);
+            nameValue = new NameValue(name, preassignedValues.get(record.tableName())
+                                                             .get(name));
 
         } else if (autoIncrement.isTrue()) {
             nameValue = NameValue.createAutoIncrement();
@@ -74,12 +75,6 @@ public class Column {
             nameValue = isForeignKey() ? new NameValue(name, referencingColumn.nameValue(preassignedValues).value()) : new NameValue(name, dataType.generateDefaultValue());
         }
         return nameValue;
-    }
-
-    private NameValue getPreassignedNameValue(final Map<String, Map<String, Object>> preassignedValues) {
-        final Object preassignedValue = preassignedValues.get(record.tableName()).get(name);
-
-        return new NameValue(name, preassignedValue);
     }
 
     private boolean isPreAssigned(final Map<String, Map<String, Object>> preassignedValues) {

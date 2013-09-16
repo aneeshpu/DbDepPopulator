@@ -94,7 +94,7 @@ public class ColumnTest {
         when(dataType.generateDefaultValue()).thenReturn(10f);
 
         final Record record = mock(Record.class);
-        when(record.name()).thenReturn("payment");
+        when(record.tableName()).thenReturn("payment");
 
         final Column status = Column.buildColumn().withTable(record).withName("status").withDataType(dataType).create();
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
@@ -107,7 +107,7 @@ public class ColumnTest {
 
         assertThat(nameValue, is(equalTo(new NameValue("status", 2))));
 
-        verify(record, atLeastOnce()).name();
+        verify(record, atLeastOnce()).tableName();
         verify(dataType, never()).generateDefaultValue();
 
     }
@@ -118,7 +118,7 @@ public class ColumnTest {
         final DataType<Float> dataType = mock(DataType.class);
 
         final Record record = mock(Record.class);
-        when(record.name()).thenReturn("payment");
+        when(record.tableName()).thenReturn("payment");
 
         final Column status = Column.buildColumn().withTable(record).withName("status").withDataType(dataType).create();
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
@@ -130,7 +130,7 @@ public class ColumnTest {
 
         assertTrue(status.isAssigned());
 
-        verify(record, atLeastOnce()).name();
+        verify(record, atLeastOnce()).tableName();
     }
 
     @Test

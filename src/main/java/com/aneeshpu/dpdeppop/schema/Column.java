@@ -126,20 +126,20 @@ public class Column {
     }
 
     private NameValue getPreassignedNameValue(final Map<String, Map<String, Object>> preassignedValues) {
-        final Object preassignedValue = preassignedValues.get(record.name()).get(name);
+        final Object preassignedValue = preassignedValues.get(record.tableName()).get(name);
 
         return new NameValue(name, preassignedValue);
     }
 
     private boolean isPreAssigned(final Map<String, Map<String, Object>> preassignedValues) {
-        if (!preassignedValues.containsKey(record.name())) {
+        if (!preassignedValues.containsKey(record.tableName())) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("No preassigned values for " + record.name());
+                LOG.debug("No preassigned values for " + record.tableName());
             }
             return false;
         }
 
-        return preassignedValues.get(record.name()).containsKey(name);
+        return preassignedValues.get(record.tableName()).containsKey(name);
     }
 
     private boolean isForeignKey() {

@@ -17,7 +17,7 @@ public class Record {
     public static final String FOREIGN_KEY_COLUMN_NAME = "fkcolumn_name";
     public static final String COLUMN_NAME = "column_name";
 
-    private final String name;
+    private final String tableName;
     private final Map<String, Map<String, Object>> preassignedValues;
     private final QueryFactory queryFactory;
     private final Map<String, Column> columns;
@@ -27,8 +27,8 @@ public class Record {
     private Map<String, Record> parentTables;
     private final Map<String,ColumnTable> foreignKeys;
 
-    public Record(String name, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory, final Map<String, List<Tuple>> parentTableMetadata) {
-        this.name = name;
+    public Record(String tableName, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory, final Map<String, List<Tuple>> parentTableMetadata) {
+        this.tableName = tableName;
         this.preassignedValues = preassignedValues;
         this.queryFactory = queryFactory;
         this.columnCreationStrategy = columnCreationStrategy;
@@ -55,7 +55,7 @@ public class Record {
     }
 
     public String tableName() {
-        return name;
+        return tableName;
     }
 
     public Column getColumn(final String columnName) {
@@ -73,7 +73,7 @@ public class Record {
     }
 
     private void populateParentsFromJDBCMetadata(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
-        final ResultSet importedKeysResultSet = connection.getMetaData().getImportedKeys(null, null, name);
+        final ResultSet importedKeysResultSet = connection.getMetaData().getImportedKeys(null, null, tableName);
 
         while (importedKeysResultSet.next()) {
             final String primaryKeyTableName = importedKeysResultSet.getString(PRIMARY_KEY_TABLE_NAME);
@@ -85,9 +85,9 @@ public class Record {
     }
 
     private void populateParentsFromProvidedMetadata(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
-        if (parentTableMetadata == null || !parentTableMetadata.containsKey(name)) {
+        if (parentTableMetadata == null || !parentTableMetadata.containsKey(tableName)) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("no parent meta data provided for table:" + name);
+                LOG.debug("no parent meta data provided for table:" + tableName);
             }
             return;
         }
@@ -125,11 +125,11 @@ public class Record {
     }
 
     private boolean parentTableIsPreassigned(final String foreignKeyColumnName) {
-        final Map<String, Object> preassignedCols = preassignedValues.get(name);
+        final Map<String, Object> preassignedCols = preassignedValues.get(tableName);
 
         if (preassignedCols == null || preassignedCols.isEmpty()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("table " + name + " has no preassigned keys.");
+                LOG.debug("table " + tableName + " has no preassigned keys.");
             }
 
             return false;
@@ -149,19 +149,19 @@ public class Record {
 
         final Record record = (Record) o;
 
-        if (!name.equals(record.name)) return false;
+        if (!tableName.equals(record.tableName)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return tableName.hashCode();
     }
 
     @Override
     public String toString() {
-        return name;
+        return tableName;
     }
 
     public Map<String, Column> columns() {
@@ -177,14 +177,14 @@ public class Record {
 
         if (onlyPopulateParentTables) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Not populating table " + name + " as onlyPopulateParentTables = " + onlyPopulateParentTables);
+                LOG.info("Not populating table " + tableName + " as onlyPopulateParentTables = " + onlyPopulateParentTables);
             }
             return tables;
         }
 
         insertDefaultValuesIntoCurrentTable(connection);
 
-        tables.put(name, this);
+        tables.put(tableName, this);
         return tables;
     }
 
@@ -194,7 +194,7 @@ public class Record {
 
             final Record parentRecord = entry.getValue();
             parentRecord.insertDefaultValuesIntoCurrentTable(connection);
-            tables.put(parentRecord.name, parentRecord);
+            tables.put(parentRecord.tableName, parentRecord);
 
             tables.putAll(parentTables);
         }
@@ -230,7 +230,7 @@ public class Record {
     }
 
     public List<String> getPrimaryKeys(final Connection connection) throws SQLException {
-        final ResultSet primaryKeysResultSet = connection.getMetaData().getPrimaryKeys(null, null, name);
+        final ResultSet primaryKeysResultSet = connection.getMetaData().getPrimaryKeys(null, null, tableName);
 
         final List<String> primaryKeys = new ArrayList<String>();
         while (primaryKeysResultSet.next()) {

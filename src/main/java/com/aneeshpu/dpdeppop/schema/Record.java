@@ -281,25 +281,7 @@ public class Record {
         return primaryKeys.contains(columnName);
     }
 
-    Map<String, ColumnTable> foreignKeyTableMap(final Connection connection) throws SQLException {
-        if(foreignKeys != null /*&& !foreignKeys.isEmpty()*/){
-            return foreignKeys;
-        }
-
-        final Map<String, ColumnTable> foreignKeys = new HashMap<String, ColumnTable>();
-
-        populateForeignKeysFromProvidedMetadata(foreignKeys);
-
-        final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, tableName());
-        while (crossReference.next()) {
-
-            final String primaryKeyTableName = crossReference.getString(PRIMARY_KEY_TABLE_NAME);
-            final String primaryKeyColName = crossReference.getString(PRIMARY_KEY_COLUMN_NAME);
-            final String foreignKeyColumnName = crossReference.getString(FOREIGN_KEY_COLUMN_NAME);
-
-            addForeignKeys(foreignKeys, primaryKeyTableName, primaryKeyColName, foreignKeyColumnName);
-        }
-
+    Map<String, ColumnTable> foreignKeyTableMap() throws SQLException {
         return foreignKeys;
     }
 

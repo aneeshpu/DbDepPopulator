@@ -16,7 +16,7 @@ class AutoIncrementBasedCreation implements ColumnCreationStrategy {
     @Override
     public Map<String, Column> populateColumns(final Record record, final Connection connection) throws SQLException {
 
-        final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap(connection);
+        final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
 
         final ResultSet columnsResultSet = connection.getMetaData().getColumns(null, null, record.tableName(), null);
 

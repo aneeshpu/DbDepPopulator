@@ -42,6 +42,7 @@ public class ColumnTest {
 
     @Test
     public void generates_a_name_value_pair_to_be_inserted_into_sql_query() {
+        when(record.tableName()).thenReturn("payment");
 
         final DataType<Float> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn(10f);
@@ -56,6 +57,7 @@ public class ColumnTest {
 
     @Test
     public void a_foreign_key_column_uses_the_default_value_generated_by_the_referenced_column() {
+        when(record.tableName()).thenReturn("payment");
 
         final DataType<Float> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn(321f);
@@ -75,6 +77,8 @@ public class ColumnTest {
 
     @Test
     public void creates_a_formatted_query_string() {
+
+        when(record.tableName()).thenReturn("payment");
 
         final DataType<String> dataType = mock(DataType.class);
         when(dataType.generateDefaultValue()).thenReturn("'c'");

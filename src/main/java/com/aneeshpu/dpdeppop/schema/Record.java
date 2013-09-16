@@ -25,6 +25,7 @@ public class Record {
     private final Map<String, List<Tuple>> parentTableMetadata;
 
     private Map<String, Record> parentTables;
+    private final Map<String,ColumnTable> foreignKeys;
 
     public Record(String name, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory, final Map<String, List<Tuple>> parentTableMetadata) {
         this.name = name;
@@ -34,6 +35,7 @@ public class Record {
         this.parentTableMetadata = parentTableMetadata;
 
         columns = new HashMap<String, Column>();
+        foreignKeys = new HashMap<String, ColumnTable>();
     }
 
     private Record initialize(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
@@ -76,8 +78,9 @@ public class Record {
         while (importedKeysResultSet.next()) {
             final String primaryKeyTableName = importedKeysResultSet.getString(PRIMARY_KEY_TABLE_NAME);
             final String foreignKeyColumnName = importedKeysResultSet.getString(FOREIGN_KEY_COLUMN_NAME);
+            final String primaryKeyColumnName = importedKeysResultSet.getString(PRIMARY_KEY_COLUMN_NAME);
 
-            addParentTable(parentTables, connection, primaryKeyTableName, foreignKeyColumnName);
+            addParentTable(parentTables, connection, primaryKeyTableName, foreignKeyColumnName, primaryKeyColumnName);
         }
     }
 
@@ -93,13 +96,14 @@ public class Record {
         for (Tuple parentTableFromMetaData : parentTableColumn) {
             final String foreignKeyColumnName = parentTableFromMetaData.getForeignKeyColumnName();
             final String primaryKeyTableName = parentTableFromMetaData.getPrimaryKeyTableName();
+            final String primaryKeyColumnName = parentTableFromMetaData.getPrimaryKeyColumnName();
 
-            addParentTable(parentTables, connection, primaryKeyTableName, foreignKeyColumnName);
+            addParentTable(parentTables, connection, primaryKeyTableName, foreignKeyColumnName, primaryKeyColumnName);
 
         }
     }
 
-    private void addParentTable(final Map<String, Record> parentTables, final Connection connection, final String primaryKeyTableName, final String foreignKeyColumnName) throws SQLException {
+    private void addParentTable(final Map<String, Record> parentTables, final Connection connection, final String primaryKeyTableName, final String foreignKeyColumnName, final String primaryKeyColumnName) throws SQLException {
         if (parentTableIsPreassigned(foreignKeyColumnName) || parentTables.containsKey(primaryKeyTableName)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(foreignKeyColumnName + " is either pre-assigned or " + primaryKeyTableName + " has already been initialized");
@@ -107,7 +111,12 @@ public class Record {
             return;
         }
 
-        parentTables.put(primaryKeyTableName, new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).withPreassignedValues(preassignedValues).withParentMetaData(parentTableMetadata).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables, connection));
+
+        final Record record = new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).withPreassignedValues(preassignedValues).withParentMetaData(parentTableMetadata).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables, connection);
+        parentTables.put(primaryKeyTableName, record);
+
+        //setting it up for use later. Might get rid of it altogether later.
+        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, record));
     }
 
     private boolean parentTableIsPreassigned(final String foreignKeyColumnName) {

@@ -21,7 +21,6 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
     @Override
     public Map<String, Column> populateColumns(final Record record, final Connection connection) throws SQLException {
 
-        final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap(connection);
 
         final ResultSet columnsResultSet = this.connection.getMetaData().getColumns(null, null, record.tableName(), null);
 
@@ -33,6 +32,7 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
             final String columnSize = columnsResultSet.getString(Column.COLUMN_SIZE);
             final String isNullable = columnsResultSet.getString(Column.IS_NULLABLE);
 
+            final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap(connection);
             final ColumnTable columnTable = foreignKeyTables.get(columnName);
             Record referencingRecord = null;
             String primaryKeyColName = null;
@@ -46,16 +46,7 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
                 LOG.debug("Building column " + columnName + " of record " + record.tableName());
             }
 
-            columnMap.put(columnName, Column.buildColumn()
-                    .withName(columnName)
-                    .withDataType(DataTypeFactory.create(dataType))
-                    .withSize(Double.valueOf(columnSize))
-                    .withIsNullable(isNullable)
-                    .withIsAutoIncrement(record.isPrimaryKey(columnName, connection) ? YesNo.YES : YesNo.NO)
-                    .withReferencingTable(referencingRecord)
-                    .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
-                    .asPrimaryKey(record.isPrimaryKey(columnName, connection))
-                    .withTable(record).create());
+            columnMap.put(columnName, Column.buildColumn().withName(columnName).withDataType(DataTypeFactory.create(dataType)).withSize(Double.valueOf(columnSize)).withIsNullable(isNullable).withIsAutoIncrement(record.isPrimaryKey(columnName, connection) ? YesNo.YES : YesNo.NO).withReferencingTable(referencingRecord).withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName)).asPrimaryKey(record.isPrimaryKey(columnName, connection)).withTable(record).create());
         }
 
         return columnMap;

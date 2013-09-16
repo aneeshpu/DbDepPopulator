@@ -3,6 +3,7 @@ package com.aneeshpu.dpdeppop.schema;
 import com.aneeshpu.dpdeppop.query.QueryFactory;
 
 import java.sql.Connection;
+import java.util.List;
 import java.util.Map;
 
 public class RecordBuilder {
@@ -10,6 +11,7 @@ public class RecordBuilder {
     private Map<String, Map<String, Object>> preassignedValues;
     private ColumnCreationStrategy columnCreationStrategy;
     private QueryFactory queryFactory;
+    private Map<String, List<Tuple>> parentTableMetadata;
 
     public RecordBuilder setName(final String name) {
         this.name = name;
@@ -20,7 +22,7 @@ public class RecordBuilder {
         return this;
     }
 
-    public RecordBuilder setPreassignedValues(final Map<String, Map<String, Object>> preassignedValues) {
+    public RecordBuilder withPreassignedValues(final Map<String, Map<String, Object>> preassignedValues) {
         this.preassignedValues = preassignedValues;
         return this;
     }
@@ -35,7 +37,12 @@ public class RecordBuilder {
         return this;
     }
 
+    public RecordBuilder withParentMetaData(final Map<String,List<Tuple>> parentTableMetadata) {
+        this.parentTableMetadata = parentTableMetadata;
+        return this;
+    }
+
     public Record createRecord() {
-        return new Record(name, preassignedValues, columnCreationStrategy, queryFactory);
+        return new Record(name, preassignedValues, columnCreationStrategy, queryFactory, parentTableMetadata);
     }
 }

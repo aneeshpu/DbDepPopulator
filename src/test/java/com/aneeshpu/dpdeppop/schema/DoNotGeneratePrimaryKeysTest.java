@@ -20,7 +20,7 @@ public class DoNotGeneratePrimaryKeysTest {
 
         final DoNotGeneratePrimaryKeys doNotGeneratePrimaryKeys = new DoNotGeneratePrimaryKeys(CONNECTION);
 
-        final Record accountRecord = new RecordBuilder().setName("account").setConnection(CONNECTION).setPreassignedValues(Collections.<String, Map<String, Object>>emptyMap()).setColumnCreationStrategy(doNotGeneratePrimaryKeys).createRecord();
+        final Record accountRecord = new RecordBuilder().setName("account").setConnection(CONNECTION).withPreassignedValues(Collections.<String, Map<String, Object>>emptyMap()).setColumnCreationStrategy(doNotGeneratePrimaryKeys).createRecord();
         final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord, CONNECTION);
 
         final Column id = populatedColumns.get("id");

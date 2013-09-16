@@ -92,7 +92,7 @@ public class Record {
             return;
         }
 
-        final List<Tuple> parentTableColumn = parentTableMetadata.get(name());
+        final List<Tuple> parentTableColumn = parentTableMetadata.get(tableName());
         for (Tuple parentTableFromMetaData : parentTableColumn) {
             final String foreignKeyColumnName = parentTableFromMetaData.getForeignKeyColumnName();
             final String primaryKeyTableName = parentTableFromMetaData.getPrimaryKeyTableName();
@@ -229,10 +229,6 @@ public class Record {
         return columnsWithGeneratedValues;
     }
 
-    public String name() {
-        return name;
-    }
-
     public List<String> getPrimaryKeys(final Connection connection) throws SQLException {
         final ResultSet primaryKeysResultSet = connection.getMetaData().getPrimaryKeys(null, null, name);
 
@@ -283,24 +279,5 @@ public class Record {
 
     Map<String, ColumnTable> foreignKeyTableMap() throws SQLException {
         return foreignKeys;
-    }
-
-    private void populateForeignKeysFromProvidedMetadata(final Map<String, ColumnTable> foreignKeys) {
-        if (parentTableMetadata == null || !parentTableMetadata.containsKey(name)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("no meta data provided for table:" + name + ". Not populating any foreign keys");
-            }
-            return;
-        }
-        final List<Tuple> tuples = parentTableMetadata.get(name);
-        for (Tuple tuple : tuples) {
-            addForeignKeys(foreignKeys, tuple.getPrimaryKeyTableName(), tuple.getPrimaryKeyColumnName(), tuple.getForeignKeyColumnName());
-        }
-    }
-
-    private void addForeignKeys(final Map<String, ColumnTable> foreignKeys, final String primaryKeyTableName, final String primaryKeyColName, final String foreignKeyColumnName) {
-        final Record primaryRecord = parentTables.get(primaryKeyTableName);
-
-        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColName, primaryRecord));
     }
 }

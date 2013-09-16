@@ -25,8 +25,6 @@ class AutoIncrementBasedCreation implements ColumnCreationStrategy {
         while (columnsResultSet.next()) {
             final String columnName = columnsResultSet.getString(Column.COLUMN_NAME);
             final String dataType = columnsResultSet.getString(Column.TYPE_NAME);
-            final String columnSize = columnsResultSet.getString(Column.COLUMN_SIZE);
-            final String isNullable = columnsResultSet.getString(Column.IS_NULLABLE);
             final String isAutoIncrement = columnsResultSet.getString(Column.IS_AUTOINCREMENT);
 
             final ColumnTable columnTable = foreignKeyTables.get(columnName);
@@ -49,5 +47,4 @@ class AutoIncrementBasedCreation implements ColumnCreationStrategy {
 
         return stringColumnHashMap;
     }
-
 }

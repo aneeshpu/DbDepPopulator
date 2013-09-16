@@ -119,6 +119,14 @@ public class Column {
         return nameValue != null && nameValue.isAssigned();
     }
 
+    public String formattedName(final Map<String, Map<String, Object>> preassignedValues) {
+        return nameValue(preassignedValues).formattedName();
+    }
+
+    public String formattedValue(final Map<String, Map<String, Object>> preassignedValues) {
+        return nameValue(preassignedValues).formattedValue();
+    }
+
     public static class ColumnBuilder {
 
         private final Column column;

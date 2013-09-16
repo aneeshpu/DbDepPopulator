@@ -21,7 +21,6 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
     @Override
     public Map<String, Column> populateColumns(final Record record, final Connection connection) throws SQLException {
 
-
         final ResultSet columnsResultSet = this.connection.getMetaData().getColumns(null, null, record.tableName(), null);
 
         final Map<String, Column> columnMap = new HashMap<String, Column>();
@@ -29,8 +28,6 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
         while (columnsResultSet.next()) {
             final String columnName = columnsResultSet.getString(Column.COLUMN_NAME);
             final String dataType = columnsResultSet.getString(Column.TYPE_NAME);
-            final String columnSize = columnsResultSet.getString(Column.COLUMN_SIZE);
-            final String isNullable = columnsResultSet.getString(Column.IS_NULLABLE);
 
             final Map<String, ColumnTable> foreignKeyTables = record.foreignKeyTableMap();
             final ColumnTable columnTable = foreignKeyTables.get(columnName);

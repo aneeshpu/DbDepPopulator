@@ -74,7 +74,8 @@ public class Record {
     }
 
     private void populateParentsFromJDBCMetadata(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
-        final ResultSet importedKeysResultSet = connection.getMetaData().getImportedKeys(null, null, tableName);
+        final ResultSet importedKeysResultSet = connection.getMetaData()
+                                                          .getImportedKeys(null, null, tableName);
 
         while (importedKeysResultSet.next()) {
             final String primaryKeyTableName = importedKeysResultSet.getString(PRIMARY_KEY_TABLE_NAME);
@@ -107,12 +108,18 @@ public class Record {
     private void addParentTable(final Map<String, Record> parentTables, final Connection connection, final String primaryKeyTableName,
                                 final String foreignKeyColumnName, final String primaryKeyColumnName) throws SQLException {
 
-        final Record record = new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).withPreassignedValues
-                (preassignedValues).withParentMetaData(parentTableMetadata).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables,
-                connection);
+        final Record record = new RecordBuilder().withQueryFactory(connection)
+                                                 .setName(primaryKeyTableName)
+                                                 .setConnection(connection)
+                                                 .withPreassignedValues(preassignedValues)
+                                                 .withParentMetaData(parentTableMetadata)
+                                                 .setColumnCreationStrategy(columnCreationStrategy)
+                                                 .createRecord()
+                                                 .initialize(parentTables, connection);
 
         //setting it up for use later. Might get rid of it altogether later.
-        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, parentTables.containsKey(primaryKeyTableName) ? parentTables.get(primaryKeyTableName) : record));
+        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, parentTables.containsKey(primaryKeyTableName) ? parentTables.get
+                (primaryKeyTableName) : record));
 
         if (parentTableIsPreassigned(foreignKeyColumnName) || parentTables.containsKey(primaryKeyTableName)) {
             if (LOG.isInfoEnabled()) {
@@ -201,10 +208,12 @@ public class Record {
 
     private String insertDefaultValuesIntoCurrentTable(final Connection connection) throws SQLException {
 
-        final ResultSet generatedKeys = queryFactory.generateInsertQuery(columns, this.preassignedValues, this, connection).execute();
+        final ResultSet generatedKeys = queryFactory.generateInsertQuery(columns, this.preassignedValues, this, connection)
+                                                    .execute();
         setGeneratedValuesOnColumns(generatedKeys, getColumnsWithGeneratedValues());
 
-        return queryFactory.generateInsertQuery(columns, this.preassignedValues, this, connection).toString();
+        return queryFactory.generateInsertQuery(columns, this.preassignedValues, this, connection)
+                           .toString();
     }
 
     private void setGeneratedValuesOnColumns(final ResultSet generatedKeys, final Map<String, Column> columnsWithGeneratedValues) throws SQLException {
@@ -220,7 +229,8 @@ public class Record {
         final Map<String, Column> columnsWithGeneratedValues = new HashMap<String, Column>();
         for (Map.Entry<String, Column> entrySet : columns.entrySet()) {
 
-            if (entrySet.getValue().isAutoIncrement()) {
+            if (entrySet.getValue()
+                        .isAutoIncrement()) {
                 columnsWithGeneratedValues.put(entrySet.getKey(), entrySet.getValue());
             }
         }
@@ -229,7 +239,8 @@ public class Record {
     }
 
     public List<String> getPrimaryKeys(final Connection connection) throws SQLException {
-        final ResultSet primaryKeysResultSet = connection.getMetaData().getPrimaryKeys(null, null, tableName);
+        final ResultSet primaryKeysResultSet = connection.getMetaData()
+                                                         .getPrimaryKeys(null, null, tableName);
 
         final List<String> primaryKeys = new ArrayList<String>();
         while (primaryKeysResultSet.next()) {
@@ -258,7 +269,8 @@ public class Record {
 
         while (entryListIterator.hasPrevious()) {
             final Map.Entry<String, Record> parentTableEntrySet = entryListIterator.previous();
-            parentTableEntrySet.getValue().deleteSelf(connection);
+            parentTableEntrySet.getValue()
+                               .deleteSelf(connection);
         }
     }
 

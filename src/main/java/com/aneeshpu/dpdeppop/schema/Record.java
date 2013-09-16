@@ -272,7 +272,7 @@ public class Record {
 
     }
 
-    public boolean isPrimaryKey(final String columnName, final Connection connection) throws SQLException {
+    boolean isPrimaryKey(final String columnName, final Connection connection) throws SQLException {
         final List<String> primaryKeys = getPrimaryKeys(connection);
         return primaryKeys.contains(columnName);
     }

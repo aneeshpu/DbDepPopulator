@@ -25,9 +25,10 @@ public class Record {
     private final Map<String, List<Tuple>> parentTableMetadata;
 
     private Map<String, Record> parentTables;
-    private final Map<String,ColumnTable> foreignKeys;
+    private final Map<String, ColumnTable> foreignKeys;
 
-    public Record(String tableName, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory, final Map<String, List<Tuple>> parentTableMetadata) {
+    public Record(String tableName, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy,
+                  final QueryFactory queryFactory, final Map<String, List<Tuple>> parentTableMetadata) {
         this.tableName = tableName;
         this.preassignedValues = preassignedValues;
         this.queryFactory = queryFactory;
@@ -103,18 +104,23 @@ public class Record {
         }
     }
 
-    private void addParentTable(final Map<String, Record> parentTables, final Connection connection, final String primaryKeyTableName, final String foreignKeyColumnName, final String primaryKeyColumnName) throws SQLException {
-        final Record record = new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).withPreassignedValues(preassignedValues).withParentMetaData(parentTableMetadata).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables, connection);
+    private void addParentTable(final Map<String, Record> parentTables, final Connection connection, final String primaryKeyTableName,
+                                final String foreignKeyColumnName, final String primaryKeyColumnName) throws SQLException {
+
+        final Record record = new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).withPreassignedValues
+                (preassignedValues).withParentMetaData(parentTableMetadata).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables,
+                connection);
 
         //setting it up for use later. Might get rid of it altogether later.
         foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, record));
 
         if (parentTableIsPreassigned(foreignKeyColumnName) || parentTables.containsKey(primaryKeyTableName)) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(foreignKeyColumnName + " is either pre-assigned or " + primaryKeyTableName + " has already been initialized");
+                LOG.info(foreignKeyColumnName + " is either pre-assigned or " + primaryKeyTableName + " has already " +
+                        "been initialized");
             }
 
-            if(parentTables.containsKey(primaryKeyTableName)){
+            if (parentTables.containsKey(primaryKeyTableName)) {
                 foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, parentTables.get(primaryKeyTableName)));
             }
 
@@ -173,7 +179,8 @@ public class Record {
 
         if (onlyPopulateParentTables) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Not populating table " + tableName + " as onlyPopulateParentTables = " + onlyPopulateParentTables);
+                LOG.info("Not populating table " + tableName + " as onlyPopulateParentTables = " +
+                        onlyPopulateParentTables);
             }
             return tables;
         }
@@ -250,7 +257,8 @@ public class Record {
     }
 
     private void deleteParents(final Connection connection) throws SQLException {
-        final ListIterator<Map.Entry<String, Record>> entryListIterator = new ArrayList<Map.Entry<String, Record>>(parentTables.entrySet()).listIterator(parentTables.size());
+        final ListIterator<Map.Entry<String, Record>> entryListIterator = new ArrayList<Map.Entry<String, Record>>(parentTables.entrySet()).listIterator(parentTables
+                .size());
 
         while (entryListIterator.hasPrevious()) {
             final Map.Entry<String, Record> parentTableEntrySet = entryListIterator.previous();

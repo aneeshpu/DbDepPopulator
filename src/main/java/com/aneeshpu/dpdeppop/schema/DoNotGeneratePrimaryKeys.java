@@ -49,10 +49,7 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
             columnMap.put(columnName, Column.buildColumn()
                     .withName(columnName)
                     .withDataType(DataTypeFactory.create(dataType))
-                    .withSize(Double.valueOf(columnSize))
-                    .withIsNullable(isNullable)
                     .withIsAutoIncrement(record.isPrimaryKey(columnName, connection) ? YesNo.YES : YesNo.NO)
-                    .withReferencingTable(referencingRecord)
                     .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
                     .asPrimaryKey(record.isPrimaryKey(columnName, connection))
                     .withTable(record).create());

@@ -8,7 +8,7 @@ public class RecordFactory {
         return new RecordBuilder()
                 .setName(tableName)
                 .setConnection(connection)
-                .setPreassignedValues(preassignedValues)
+                .withPreassignedValues(preassignedValues)
                 .setColumnCreationStrategy(new AutoIncrementBasedCreation())
                 .withQueryFactory(connection)
                 .createRecord();
@@ -18,7 +18,7 @@ public class RecordFactory {
         return new RecordBuilder()
                 .setName(tableName)
                 .setConnection(connection)
-                .setPreassignedValues(preassignedValues)
+                .withPreassignedValues(preassignedValues)
                 .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection))
                 .withQueryFactory(connection)
                 .createRecord();

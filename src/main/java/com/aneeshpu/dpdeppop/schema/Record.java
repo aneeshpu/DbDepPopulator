@@ -22,14 +22,16 @@ public class Record {
     private final QueryFactory queryFactory;
     private final Map<String, Column> columns;
     private final ColumnCreationStrategy columnCreationStrategy;
+    private final Map<String, List<Tuple>> parentTableMetadata;
 
     private Map<String, Record> parentTables;
 
-    public Record(String name, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory) {
+    public Record(String name, final Map<String, Map<String, Object>> preassignedValues, final ColumnCreationStrategy columnCreationStrategy, final QueryFactory queryFactory, final Map<String, List<Tuple>> parentTableMetadata) {
         this.name = name;
         this.preassignedValues = preassignedValues;
         this.queryFactory = queryFactory;
         this.columnCreationStrategy = columnCreationStrategy;
+        this.parentTableMetadata = parentTableMetadata;
 
         columns = new HashMap<String, Column>();
     }
@@ -59,24 +61,53 @@ public class Record {
     }
 
     private Map<String, Record> populateParents(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
+
+        populateParentsFromProvidedMetadata(parentTables, connection);
+
+        populateParentsFromJDBCMetadata(parentTables, connection);
+
+        return parentTables;
+
+    }
+
+    private void populateParentsFromJDBCMetadata(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
         final ResultSet importedKeysResultSet = connection.getMetaData().getImportedKeys(null, null, name);
 
         while (importedKeysResultSet.next()) {
             final String primaryKeyTableName = importedKeysResultSet.getString(PRIMARY_KEY_TABLE_NAME);
             final String foreignKeyColumnName = importedKeysResultSet.getString(FOREIGN_KEY_COLUMN_NAME);
 
-            if (parentTableIsPreassigned(foreignKeyColumnName) || parentTables.containsKey(primaryKeyTableName)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(foreignKeyColumnName + " is either pre-assigned or " + primaryKeyTableName + " has already been initialized");
-                }
-                continue;
-            }
+            addParentTable(parentTables, connection, primaryKeyTableName, foreignKeyColumnName);
+        }
+    }
 
-            parentTables.put(primaryKeyTableName, new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).setPreassignedValues(preassignedValues).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables, connection));
+    private void populateParentsFromProvidedMetadata(final Map<String, Record> parentTables, final Connection connection) throws SQLException {
+        if (parentTableMetadata == null || !parentTableMetadata.containsKey(name)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("no parent meta data provided for table:" + name);
+            }
+            return;
         }
 
-        return parentTables;
+        final List<Tuple> parentTableColumn = parentTableMetadata.get(name());
+        for (Tuple parentTableFromMetaData : parentTableColumn) {
+            final String foreignKeyColumnName = parentTableFromMetaData.getForeignKeyColumnName();
+            final String primaryKeyTableName = parentTableFromMetaData.getPrimaryKeyTableName();
 
+            addParentTable(parentTables, connection, primaryKeyTableName, foreignKeyColumnName);
+
+        }
+    }
+
+    private void addParentTable(final Map<String, Record> parentTables, final Connection connection, final String primaryKeyTableName, final String foreignKeyColumnName) throws SQLException {
+        if (parentTableIsPreassigned(foreignKeyColumnName) || parentTables.containsKey(primaryKeyTableName)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(foreignKeyColumnName + " is either pre-assigned or " + primaryKeyTableName + " has already been initialized");
+            }
+            return;
+        }
+
+        parentTables.put(primaryKeyTableName, new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).withPreassignedValues(preassignedValues).withParentMetaData(parentTableMetadata).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables, connection));
     }
 
     private boolean parentTableIsPreassigned(final String foreignKeyColumnName) {
@@ -238,22 +269,39 @@ public class Record {
 
     Map<String, ColumnTable> foreignKeyTableMap(final Connection connection) throws SQLException {
 
-        final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, tableName());
-
         final Map<String, ColumnTable> foreignKeys = new HashMap<String, ColumnTable>();
+
+        populateForeignKeysFromProvidedMetadata(foreignKeys);
+
+        final ResultSet crossReference = connection.getMetaData().getCrossReference(null, null, null, null, null, tableName());
         while (crossReference.next()) {
 
             final String primaryKeyTableName = crossReference.getString(PRIMARY_KEY_TABLE_NAME);
             final String primaryKeyColName = crossReference.getString(PRIMARY_KEY_COLUMN_NAME);
             final String foreignKeyColumnName = crossReference.getString(FOREIGN_KEY_COLUMN_NAME);
 
-
-            final Record primaryRecord = this.parentTables.get(primaryKeyTableName);
-
-            foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColName, primaryRecord));
+            addForeignKeys(foreignKeys, primaryKeyTableName, primaryKeyColName, foreignKeyColumnName);
         }
 
-
         return foreignKeys;
+    }
+
+    private void populateForeignKeysFromProvidedMetadata(final Map<String, ColumnTable> foreignKeys) {
+        if (parentTableMetadata == null || !parentTableMetadata.containsKey(name)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("no meta data provided for table:" + name + ". Not populating any foreign keys");
+            }
+            return;
+        }
+        final List<Tuple> tuples = parentTableMetadata.get(name);
+        for (Tuple tuple : tuples) {
+            addForeignKeys(foreignKeys, tuple.getPrimaryKeyTableName(), tuple.getPrimaryKeyColumnName(), tuple.getForeignKeyColumnName());
+        }
+    }
+
+    private void addForeignKeys(final Map<String, ColumnTable> foreignKeys, final String primaryKeyTableName, final String primaryKeyColName, final String foreignKeyColumnName) {
+        final Record primaryRecord = parentTables.get(primaryKeyTableName);
+
+        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColName, primaryRecord));
     }
 }

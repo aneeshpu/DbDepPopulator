@@ -138,10 +138,6 @@ public class Record {
         return preassignedCols.containsKey(foreignKeyColumnName);
     }
 
-    private Map<String, Record> parents() {
-        return parentTables;
-    }
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

@@ -111,9 +111,8 @@ public class InsertQueryTest {
         final LinkedHashMap<String, Column> columns = new LinkedHashMap<String, Column>();
         columns.put("name", accountNameColumn);
 
-        when(accountNameColumn.nameValue(any(Map.class))).thenReturn(accountTableNameColumnNameValue);
-        when(accountTableNameColumnNameValue.formattedName()).thenReturn("\"name\",");
-        when(accountTableNameColumnNameValue.formattedValue()).thenReturn("'dbdeppop',");
+        when(accountNameColumn.formattedName(any(Map.class))).thenReturn("\"name\",");
+        when(accountNameColumn.formattedValue(any(Map.class))).thenReturn("'dbdeppop',");
         return columns;
     }
 
@@ -128,17 +127,14 @@ public class InsertQueryTest {
         columns.put("amount", amountColumn);
         columns.put("status", statusColumn);
 
-        when(invoiceColumnNameValue.formattedName()).thenReturn("\"invoice_id\",");
-        when(invoiceColumnNameValue.formattedValue()).thenReturn("1,");
-        when(invoiceColumn.nameValue(any(Map.class))).thenReturn(invoiceColumnNameValue);
+        when(invoiceColumn.formattedName(any(Map.class))).thenReturn("\"invoice_id\",");
+        when(invoiceColumn.formattedValue(any(Map.class))).thenReturn("1,");
 
-        when(amountColumnNameValue.formattedName()).thenReturn("\"amount\",");
-        when(amountColumnNameValue.formattedValue()).thenReturn("10,");
-        when(amountColumn.nameValue(any(Map.class))).thenReturn(amountColumnNameValue);
+        when(amountColumn.formattedName(any(Map.class))).thenReturn("\"amount\",");
+        when(amountColumn.formattedValue(any(Map.class))).thenReturn("10,");
 
-        when(statusColumnNameValue.formattedName()).thenReturn("\"status\",");
-        when(statusColumnNameValue.formattedValue()).thenReturn("2,");
-        when(statusColumn.nameValue(any(Map.class))).thenReturn(statusColumnNameValue);
+        when(statusColumn.formattedName(any(Map.class))).thenReturn("\"status\",");
+        when(statusColumn.formattedValue(any(Map.class))).thenReturn("2,");
 
         return columns;
     }

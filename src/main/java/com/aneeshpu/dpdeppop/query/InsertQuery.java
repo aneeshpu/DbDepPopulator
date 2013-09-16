@@ -2,7 +2,6 @@ package com.aneeshpu.dpdeppop.query;
 
 import com.aneeshpu.dpdeppop.DBDepPopException;
 import com.aneeshpu.dpdeppop.schema.Column;
-import com.aneeshpu.dpdeppop.schema.NameValue;
 import com.aneeshpu.dpdeppop.schema.Record;
 import org.apache.log4j.Logger;
 
@@ -49,11 +48,8 @@ class InsertQuery implements Query {
                 continue;
             }
 
-            final NameValue nameValue = column.nameValue(preassignedValues);
-
-            //TODO:Push the formattedName and formattedValue method into Column
-            columnNamesPartOfQuery.append(nameValue.formattedName());
-            valuesPartOfQuery.append(nameValue.formattedValue());
+            columnNamesPartOfQuery.append(column.formattedName(preassignedValues));
+            valuesPartOfQuery.append(column.formattedValue(preassignedValues));
         }
 
         columnNamesPartOfQuery.deleteCharAt(columnNamesPartOfQuery.length() - 1);

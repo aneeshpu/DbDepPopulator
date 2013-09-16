@@ -112,16 +112,12 @@ public class Record {
                 connection);
 
         //setting it up for use later. Might get rid of it altogether later.
-        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, record));
+        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, parentTables.containsKey(primaryKeyTableName) ? parentTables.get(primaryKeyTableName) : record));
 
         if (parentTableIsPreassigned(foreignKeyColumnName) || parentTables.containsKey(primaryKeyTableName)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(foreignKeyColumnName + " is either pre-assigned or " + primaryKeyTableName + " has already " +
                         "been initialized");
-            }
-
-            if (parentTables.containsKey(primaryKeyTableName)) {
-                foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, parentTables.get(primaryKeyTableName)));
             }
 
             return;

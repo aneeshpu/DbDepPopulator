@@ -104,19 +104,24 @@ public class Record {
     }
 
     private void addParentTable(final Map<String, Record> parentTables, final Connection connection, final String primaryKeyTableName, final String foreignKeyColumnName, final String primaryKeyColumnName) throws SQLException {
+        final Record record = new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).withPreassignedValues(preassignedValues).withParentMetaData(parentTableMetadata).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables, connection);
+
+        //setting it up for use later. Might get rid of it altogether later.
+        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, record));
+
         if (parentTableIsPreassigned(foreignKeyColumnName) || parentTables.containsKey(primaryKeyTableName)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(foreignKeyColumnName + " is either pre-assigned or " + primaryKeyTableName + " has already been initialized");
             }
+
+            if(parentTables.containsKey(primaryKeyTableName)){
+                foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, parentTables.get(primaryKeyTableName)));
+            }
+
             return;
         }
 
-
-        final Record record = new RecordBuilder().withQueryFactory(connection).setName(primaryKeyTableName).setConnection(connection).withPreassignedValues(preassignedValues).withParentMetaData(parentTableMetadata).setColumnCreationStrategy(columnCreationStrategy).createRecord().initialize(parentTables, connection);
         parentTables.put(primaryKeyTableName, record);
-
-        //setting it up for use later. Might get rid of it altogether later.
-        foreignKeys.put(foreignKeyColumnName, new ColumnTable(primaryKeyColumnName, record));
     }
 
     private boolean parentTableIsPreassigned(final String foreignKeyColumnName) {
@@ -277,6 +282,9 @@ public class Record {
     }
 
     Map<String, ColumnTable> foreignKeyTableMap(final Connection connection) throws SQLException {
+        if(foreignKeys != null /*&& !foreignKeys.isEmpty()*/){
+            return foreignKeys;
+        }
 
         final Map<String, ColumnTable> foreignKeys = new HashMap<String, ColumnTable>();
 

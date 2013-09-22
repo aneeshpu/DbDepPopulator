@@ -16,6 +16,7 @@ public class RecordBuilder {
 
     public RecordBuilder(final Connection connection) {
         columnCreationStrategy = new DoNotGeneratePrimaryKeys(connection);
+        queryFactory = new QueryFactory();
     }
 
     public RecordBuilder setName(final String name) {
@@ -44,6 +45,9 @@ public class RecordBuilder {
     }
 
     public Record createRecord() {
+        if(name == null){
+            throw new InvalidRecordException("Record cannot be created without a table name");
+        }
         return new Record(name, preassignedValues, columnCreationStrategy, queryFactory, parentTableMetadata);
     }
 }

@@ -7,7 +7,6 @@ public class RecordFactory {
     public static Record createRecordWithAutoIncrementBasedCreation(final String tableName, final Connection connection, final Map<String, Map<String, Object>> preassignedValues) {
         return new RecordBuilder()
                 .setName(tableName)
-                .setConnection(connection)
                 .withPreassignedValues(preassignedValues)
                 .setColumnCreationStrategy(new AutoIncrementBasedCreation())
                 .withQueryFactory(connection)
@@ -17,7 +16,6 @@ public class RecordFactory {
     public static Record createRecordDontAssignPrimaryKeys(final String tableName, final Connection connection, final Map<String, Map<String, Object>> preassignedValues) {
         return new RecordBuilder()
                 .setName(tableName)
-                .setConnection(connection)
                 .withPreassignedValues(preassignedValues)
                 .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection))
                 .withQueryFactory(connection)

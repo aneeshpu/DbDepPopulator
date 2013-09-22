@@ -110,7 +110,6 @@ public class Record {
 
         final Record record = new RecordBuilder().withQueryFactory(connection)
                                                  .setName(primaryKeyTableName)
-                                                 .setConnection(connection)
                                                  .withPreassignedValues(preassignedValues)
                                                  .withParentMetaData(parentTableMetadata)
                                                  .setColumnCreationStrategy(columnCreationStrategy)

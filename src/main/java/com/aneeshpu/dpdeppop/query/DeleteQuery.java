@@ -55,8 +55,8 @@ class DeleteQuery implements Query {
         final NameValue nameValue = primaryKeyColumn.nameValue(preassignedValues);
         final String deleteQuery = String.format(DELETE_QUERY_TEMPLATE, record.tableName(), nameValue.formattedNameWithoutTrailingComma(), nameValue.formattedValueWithoutTrailingComma());
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("delete query for table, " + record + ": " + deleteQuery);
+        if (QUERYLOG.isInfoEnabled()) {
+            QUERYLOG.info("delete query:" + deleteQuery);
         }
         return deleteQuery;
     }

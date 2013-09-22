@@ -76,8 +76,8 @@ class InsertQuery implements Query {
 
     @Override
     public ResultSet execute() throws SQLException {
-        if (Record.LOG.isDebugEnabled()) {
-            Record.LOG.debug("insert query: " + this);
+        if (QUERYLOG.isDebugEnabled()) {
+            QUERYLOG.debug("insert query: " + this);
         }
 
         final Statement statement = connection.createStatement();

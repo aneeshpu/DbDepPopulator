@@ -34,18 +34,18 @@ public class RecordBuilder {
         return this;
     }
 
-    public RecordBuilder withQueryFactory(final Connection connection) {
+    public RecordBuilder withQueryFactory() {
         this.queryFactory = new QueryFactory();
         return this;
     }
 
-    public RecordBuilder withParentMetaData(final Map<String,List<Tuple>> parentTableMetadata) {
+    public RecordBuilder withParentMetaData(final Map<String, List<Tuple>> parentTableMetadata) {
         this.parentTableMetadata = parentTableMetadata;
         return this;
     }
 
     public Record createRecord() {
-        if(name == null){
+        if (name == null) {
             throw new InvalidRecordException("Record cannot be created without a table name");
         }
         return new Record(name, preassignedValues, columnCreationStrategy, queryFactory, parentTableMetadata);

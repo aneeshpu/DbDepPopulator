@@ -9,7 +9,7 @@ public class RecordFactory {
                 .setName(tableName)
                 .withPreassignedValues(preassignedValues)
                 .setColumnCreationStrategy(new AutoIncrementBasedCreation())
-                .withQueryFactory(connection)
+                .withQueryFactory()
                 .createRecord();
     }
 
@@ -18,7 +18,7 @@ public class RecordFactory {
                 .setName(tableName)
                 .withPreassignedValues(preassignedValues)
                 .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection))
-                .withQueryFactory(connection)
+                .withQueryFactory()
                 .createRecord();
 
     }

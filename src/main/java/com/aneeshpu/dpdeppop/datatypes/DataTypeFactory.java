@@ -1,7 +1,7 @@
 package com.aneeshpu.dpdeppop.datatypes;
 
 public class DataTypeFactory {
-    public static DataType create(final String dataType) {
+    public DataType create(final String dataType) {
 
         final String dataTypeInLowerCase = dataType.toLowerCase();
         if (dataTypeInLowerCase.startsWith("int")) {

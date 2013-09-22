@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import com.aneeshpu.dpdeppop.datatypes.DataTypeFactory;
 import com.aneeshpu.dpdeppop.query.QueryFactory;
 
 import java.sql.Connection;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class RecordBuilder {
+    private final Connection connection;
     private String name;
     private Map<String, Map<String, Object>> preassignedValues;
     private ColumnCreationStrategy columnCreationStrategy;
@@ -15,12 +17,18 @@ public class RecordBuilder {
 
 
     public RecordBuilder(final Connection connection) {
-        columnCreationStrategy = new DoNotGeneratePrimaryKeys(connection);
+        this.connection = connection;
+        columnCreationStrategy = new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory());
         queryFactory = new QueryFactory();
     }
 
     public RecordBuilder setName(final String name) {
         this.name = name;
+        return this;
+    }
+
+    public RecordBuilder withDataTypeFactory(DataTypeFactory dataTypeFactory){
+        columnCreationStrategy = new DoNotGeneratePrimaryKeys(connection, dataTypeFactory);
         return this;
     }
 

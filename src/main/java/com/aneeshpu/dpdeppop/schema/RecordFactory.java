@@ -1,5 +1,7 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import com.aneeshpu.dpdeppop.datatypes.DataTypeFactory;
+
 import java.sql.Connection;
 import java.util.Map;
 
@@ -17,7 +19,7 @@ public class RecordFactory {
         return new RecordBuilder(connection)
                 .setName(tableName)
                 .withPreassignedValues(preassignedValues)
-                .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection))
+                .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory()))
                 .withQueryFactory()
                 .createRecord();
 

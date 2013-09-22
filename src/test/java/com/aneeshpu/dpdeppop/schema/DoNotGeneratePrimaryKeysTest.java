@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import com.aneeshpu.dpdeppop.datatypes.DataTypeFactory;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -18,7 +19,7 @@ public class DoNotGeneratePrimaryKeysTest {
     @Test
     public void does_not_generate_values_for_primary_keys() throws SQLException {
 
-        final DoNotGeneratePrimaryKeys doNotGeneratePrimaryKeys = new DoNotGeneratePrimaryKeys(connection);
+        final DoNotGeneratePrimaryKeys doNotGeneratePrimaryKeys = new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory());
 
         final Record accountRecord = new RecordBuilder(connection).setName("account").withPreassignedValues(Collections.<String, Map<String, Object>>emptyMap()).setColumnCreationStrategy(doNotGeneratePrimaryKeys).createRecord();
         final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord, connection);

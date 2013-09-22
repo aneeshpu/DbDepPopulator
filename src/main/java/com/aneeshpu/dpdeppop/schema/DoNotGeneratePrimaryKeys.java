@@ -13,9 +13,11 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
 
     public static final Logger LOG = Logger.getLogger(DoNotGeneratePrimaryKeys.class);
     private final Connection connection;
+    private final DataTypeFactory dataTypeFactory;
 
-    DoNotGeneratePrimaryKeys(final Connection connection) {
+    DoNotGeneratePrimaryKeys(final Connection connection, final DataTypeFactory dataTypeFactory) {
         this.connection = connection;
+        this.dataTypeFactory = dataTypeFactory;
     }
 
     @Override
@@ -43,13 +45,10 @@ class DoNotGeneratePrimaryKeys implements ColumnCreationStrategy {
                 LOG.debug("Building column " + columnName + " of record " + record.tableName());
             }
 
-            columnMap.put(columnName, Column.buildColumn()
-                    .withName(columnName)
-                    .withDataType(DataTypeFactory.create(dataType))
-                    .withIsAutoIncrement(record.isPrimaryKey(columnName, connection) ? YesNo.YES : YesNo.NO)
-                    .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
-                    .asPrimaryKey(record.isPrimaryKey(columnName, connection))
-                    .withTable(record).create());
+            columnMap.put(columnName, Column.buildColumn().withName(columnName).withDataType(dataTypeFactory.create(dataType))
+                                            .withIsAutoIncrement(record.isPrimaryKey(columnName, connection) ? YesNo.YES : YesNo.NO)
+                                            .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
+                                            .asPrimaryKey(record.isPrimaryKey(columnName, connection)).withTable(record).create());
         }
 
         return columnMap;

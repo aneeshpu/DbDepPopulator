@@ -1,5 +1,6 @@
 package com.aneeshpu.dpdeppop.schema;
 
+import com.aneeshpu.dpdeppop.datatypes.DataTypeFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -115,7 +116,7 @@ public class RecordTest {
         preassignedValues.put("payment", values);
 
         Record paymentRecord = new RecordBuilder(connection).withQueryFactory().setName("payment").withPreassignedValues(preassignedValues)
-                                                  .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+                                                  .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory())).createRecord();
 
         final boolean onlyPopulateParentTables = false;
         final Map<String, Record> generatedTables = paymentRecord.populate(onlyPopulateParentTables, connection);
@@ -191,7 +192,7 @@ public class RecordTest {
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
         final Record refundRecord = new RecordBuilder(connection).withQueryFactory().setName("refund").withPreassignedValues(preassignedValues)
-                                                       .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+                                                       .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory())).createRecord();
         final Map<String, Record> populatedTables = refundRecord.populate(false, connection);
 
         refundRecord.delete(connection);
@@ -219,7 +220,7 @@ public class RecordTest {
 
         final Record accountRecord = new RecordBuilder(connection).withQueryFactory().setName("account")
                                                         .withPreassignedValues(Collections.<String, Map<String, Object>>emptyMap())
-                                                        .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+                                                        .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory())).createRecord();
         final Map<String, Record> populatedTables = accountRecord.populate(false, connection);
 
         assertTrue(populatedTables.get("account").getColumn("id").isPrimaryKey());
@@ -233,7 +234,7 @@ public class RecordTest {
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
         final Record refundRecord = new RecordBuilder(connection).withQueryFactory().setName("refund").withPreassignedValues(preassignedValues)
-                                                       .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection)).createRecord();
+                                                       .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory())).createRecord();
         final Map<String, Record> populatedTables = refundRecord.populate(true, connection);
 
         refundRecord.delete(connection);

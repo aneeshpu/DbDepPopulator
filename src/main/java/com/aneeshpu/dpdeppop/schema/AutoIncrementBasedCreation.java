@@ -10,7 +10,10 @@ import java.util.Map;
 
 class AutoIncrementBasedCreation implements ColumnCreationStrategy {
 
+    private final DataTypeFactory dataTypeFactory;
+
     public AutoIncrementBasedCreation() {
+        dataTypeFactory = new DataTypeFactory();
     }
 
     @Override
@@ -36,13 +39,10 @@ class AutoIncrementBasedCreation implements ColumnCreationStrategy {
                 primaryKeyColName = columnTable.getPrimaryKeyColName();
             }
 
-            stringColumnHashMap.put(columnName, Column.buildColumn().withName(columnName)
-                    .withDataType(DataTypeFactory.create(dataType))
-                    .withIsAutoIncrement(isAutoIncrement)
-                    .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
-                    .withTable(record)
-                    .asPrimaryKey(record.isPrimaryKey(columnName, connection))
-                    .create());
+            stringColumnHashMap.put(columnName, Column.buildColumn().withName(columnName).withDataType(dataTypeFactory.create(dataType))
+                                                      .withIsAutoIncrement(isAutoIncrement)
+                                                      .withReferencingColumn(referencingRecord == null ? null : referencingRecord.getColumn(primaryKeyColName))
+                                                      .withTable(record).asPrimaryKey(record.isPrimaryKey(columnName, connection)).create());
         }
 
         return stringColumnHashMap;

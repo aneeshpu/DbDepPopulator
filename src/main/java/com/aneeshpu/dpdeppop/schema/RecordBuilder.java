@@ -13,6 +13,11 @@ public class RecordBuilder {
     private QueryFactory queryFactory;
     private Map<String, List<Tuple>> parentTableMetadata;
 
+
+    public RecordBuilder(final Connection connection) {
+        columnCreationStrategy = new DoNotGeneratePrimaryKeys(connection);
+    }
+
     public RecordBuilder setName(final String name) {
         this.name = name;
         return this;

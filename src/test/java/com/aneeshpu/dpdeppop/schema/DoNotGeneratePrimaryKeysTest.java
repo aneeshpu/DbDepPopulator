@@ -13,15 +13,15 @@ import static org.junit.Assert.assertThat;
 
 public class DoNotGeneratePrimaryKeysTest {
 
-    public static final Connection CONNECTION = new ConnectionFactory().getConnection();
+    public static final Connection connection = new ConnectionFactory().getConnection();
 
     @Test
     public void does_not_generate_values_for_primary_keys() throws SQLException {
 
-        final DoNotGeneratePrimaryKeys doNotGeneratePrimaryKeys = new DoNotGeneratePrimaryKeys(CONNECTION);
+        final DoNotGeneratePrimaryKeys doNotGeneratePrimaryKeys = new DoNotGeneratePrimaryKeys(connection);
 
-        final Record accountRecord = new RecordBuilder().setName("account").withPreassignedValues(Collections.<String, Map<String, Object>>emptyMap()).setColumnCreationStrategy(doNotGeneratePrimaryKeys).createRecord();
-        final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord, CONNECTION);
+        final Record accountRecord = new RecordBuilder(connection).setName("account").withPreassignedValues(Collections.<String, Map<String, Object>>emptyMap()).setColumnCreationStrategy(doNotGeneratePrimaryKeys).createRecord();
+        final Map<String,Column> populatedColumns = doNotGeneratePrimaryKeys.populateColumns(accountRecord, connection);
 
         final Column id = populatedColumns.get("id");
         assertThat(id, is(equalTo(Column.buildColumn().withTable(accountRecord).withName("id").create())));

@@ -18,10 +18,6 @@ public class RecordBuilder {
         return this;
     }
 
-    public RecordBuilder setConnection(final Connection connection) {
-        return this;
-    }
-
     public RecordBuilder withPreassignedValues(final Map<String, Map<String, Object>> preassignedValues) {
         this.preassignedValues = preassignedValues;
         return this;

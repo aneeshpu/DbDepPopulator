@@ -108,7 +108,7 @@ public class Record {
     private void addParentTable(final Map<String, Record> parentTables, final Connection connection, final String primaryKeyTableName,
                                 final String foreignKeyColumnName, final String primaryKeyColumnName) throws SQLException {
 
-        final Record record = new RecordBuilder(connection).withQueryFactory(connection)
+        final Record record = new RecordBuilder(connection).withQueryFactory()
                                                  .setName(primaryKeyTableName)
                                                  .withPreassignedValues(preassignedValues)
                                                  .withParentMetaData(parentTableMetadata)

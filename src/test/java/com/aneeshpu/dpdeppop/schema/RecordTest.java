@@ -30,7 +30,7 @@ public class RecordTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        paymentRecord = new RecordBuilder(connection).withQueryFactory().setName("payment").withPreassignedValues(preassignedValues)
+        paymentRecord = new RecordBuilder(connection).withQueryFactory().withName("payment").withPreassignedValues(preassignedValues)
                                            .setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord();
     }
 
@@ -50,7 +50,7 @@ public class RecordTest {
     public void foreign_keys_are_populated_with_their_referencing_tables() throws SQLException {
         paymentRecord.populate(false, connection);
         final Column invoiceId = paymentRecord.columns().get("invoice_id");
-        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new RecordBuilder(connection).setName("invoice")
+        assertThat(invoiceId.getReferencingColumn(), is(equalTo(Column.buildColumn().withTable(new RecordBuilder(connection).withName("invoice")
                                                                                                                   .withPreassignedValues(new HashMap<String,
                                                                                                                           Map<String, Object>>())
                                                                                                                   .setColumnCreationStrategy(new
@@ -61,7 +61,7 @@ public class RecordTest {
     @Test
     public void creates_a_string_representation_of_table() {
 
-        assertThat(new RecordBuilder(connection).setName("payment").withPreassignedValues(new HashMap<String, Map<String, Object>>())
+        assertThat(new RecordBuilder(connection).withName("payment").withPreassignedValues(new HashMap<String, Map<String, Object>>())
                                       .setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord().toString(), is(equalTo("payment")));
     }
 
@@ -69,7 +69,7 @@ public class RecordTest {
     public void generates_an_insert_query() throws SQLException {
 
         final Map<String, Map<String, Object>> preassignedValues = new HashMap<String, Map<String, Object>>();
-        final Record accountRecord = new RecordBuilder(connection).withQueryFactory().setName("account").withPreassignedValues(preassignedValues)
+        final Record accountRecord = new RecordBuilder(connection).withQueryFactory().withName("account").withPreassignedValues(preassignedValues)
                                                         .setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord();
 
         final Map<String, Record> tables = accountRecord.populate(false, connection);
@@ -88,7 +88,7 @@ public class RecordTest {
 
         preassignedValues.put("payment", values);
 
-        Record paymentRecord = new RecordBuilder(connection).withQueryFactory().setName("payment").withPreassignedValues(preassignedValues)
+        Record paymentRecord = new RecordBuilder(connection).withQueryFactory().withName("payment").withPreassignedValues(preassignedValues)
                                                   .setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord();
 
         final boolean onlyPopulateParentTables = false;
@@ -115,7 +115,7 @@ public class RecordTest {
 
         preassignedValues.put("payment", values);
 
-        Record paymentRecord = new RecordBuilder(connection).withQueryFactory().setName("payment").withPreassignedValues(preassignedValues)
+        Record paymentRecord = new RecordBuilder(connection).withQueryFactory().withName("payment").withPreassignedValues(preassignedValues)
                                                   .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory())).createRecord();
 
         final boolean onlyPopulateParentTables = false;
@@ -143,7 +143,7 @@ public class RecordTest {
 
         preassignedValues.put("payment", values);
 
-        Record paymentRecord = new RecordBuilder(connection).setName("payment").withPreassignedValues(preassignedValues)
+        Record paymentRecord = new RecordBuilder(connection).withName("payment").withPreassignedValues(preassignedValues)
                                                   .setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord();
 
         final boolean onlyPopulateParentTables = true;
@@ -167,7 +167,7 @@ public class RecordTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        final Record refundRecord = new RecordBuilder(connection).withQueryFactory().setName("refund").withPreassignedValues(preassignedValues)
+        final Record refundRecord = new RecordBuilder(connection).withQueryFactory().withName("refund").withPreassignedValues(preassignedValues)
                                                        .setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord();
         final Map<String, Record> populatedTables = refundRecord.populate(false, connection);
 
@@ -191,7 +191,7 @@ public class RecordTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        final Record refundRecord = new RecordBuilder(connection).withQueryFactory().setName("refund").withPreassignedValues(preassignedValues)
+        final Record refundRecord = new RecordBuilder(connection).withQueryFactory().withName("refund").withPreassignedValues(preassignedValues)
                                                        .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory())).createRecord();
         final Map<String, Record> populatedTables = refundRecord.populate(false, connection);
 
@@ -218,7 +218,7 @@ public class RecordTest {
     @Test
     public void primary_keys_are_marked() throws SQLException {
 
-        final Record accountRecord = new RecordBuilder(connection).withQueryFactory().setName("account")
+        final Record accountRecord = new RecordBuilder(connection).withQueryFactory().withName("account")
                                                         .withPreassignedValues(Collections.<String, Map<String, Object>>emptyMap())
                                                         .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory())).createRecord();
         final Map<String, Record> populatedTables = accountRecord.populate(false, connection);
@@ -233,7 +233,7 @@ public class RecordTest {
         final Map<String, Object> columnValues = new HashMap<String, Object>();
         columnValues.put("status", "2");
         preassignedValues.put("payment", columnValues);
-        final Record refundRecord = new RecordBuilder(connection).withQueryFactory().setName("refund").withPreassignedValues(preassignedValues)
+        final Record refundRecord = new RecordBuilder(connection).withQueryFactory().withName("refund").withPreassignedValues(preassignedValues)
                                                        .setColumnCreationStrategy(new DoNotGeneratePrimaryKeys(connection, new DataTypeFactory())).createRecord();
         final Map<String, Record> populatedTables = refundRecord.populate(true, connection);
 
@@ -261,7 +261,7 @@ public class RecordTest {
         parentTableMetadata.put("payment", new ArrayList<Tuple>() {{
             add(new Tuple("credit_id", "id", "credit"));
         }});
-        paymentRecord = new RecordBuilder(connection).withQueryFactory().setName("payment").withPreassignedValues(preassignedValues)
+        paymentRecord = new RecordBuilder(connection).withQueryFactory().withName("payment").withPreassignedValues(preassignedValues)
                                            .withParentMetaData(parentTableMetadata).setColumnCreationStrategy(new AutoIncrementBasedCreation()).createRecord();
 
         final Map<String, Record> records = paymentRecord.populate(false, connection);

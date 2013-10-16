@@ -109,7 +109,7 @@ public class Record {
                                 final String foreignKeyColumnName, final String primaryKeyColumnName) throws SQLException {
 
         final Record record = new RecordBuilder(connection).withQueryFactory()
-                                                 .setName(primaryKeyTableName)
+                                                 .withName(primaryKeyTableName)
                                                  .withPreassignedValues(preassignedValues)
                                                  .withParentMetaData(parentTableMetadata)
                                                  .setColumnCreationStrategy(columnCreationStrategy)

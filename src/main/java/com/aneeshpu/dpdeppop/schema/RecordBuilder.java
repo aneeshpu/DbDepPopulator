@@ -22,7 +22,7 @@ public class RecordBuilder {
         queryFactory = new QueryFactory();
     }
 
-    public RecordBuilder setName(final String name) {
+    public RecordBuilder withName(final String name) {
         this.name = name;
         return this;
     }
